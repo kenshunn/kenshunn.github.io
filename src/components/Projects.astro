@@ -57,7 +57,7 @@ const rest = projects.filter((p) => !p.featured);
   </div>
 </section>
 
-<style>
+<style is:global>
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
 
@@ -104,10 +104,9 @@ const rest = projects.filter((p) => !p.featured);
 </style>
 
 <script>
-  const wrap = document.querySelector('.project-carousel');
-  const track = wrap?.querySelector('.project-track');
-
-  if (wrap && track && track.children.length > 0) {
+  document.querySelectorAll('.project-carousel').forEach((wrap) => {
+    const track = wrap.querySelector('.project-track');
+    if (!track || track.children.length === 0) return;
     const EASE = 0.2;      // arrow glide stiffness
     const FRICTION = 0.86; // drag-release momentum decay (lower = stops sooner)
     const MAX_V = 16;      // speed cap (px/frame) for fling + wheel
@@ -214,5 +213,5 @@ const rest = projects.filter((p) => !p.featured);
     track.addEventListener('click', (e) => {
       if (moved > 6) { e.preventDefault(); e.stopPropagation(); }
     }, true);
-  }
+  });
 </script>
