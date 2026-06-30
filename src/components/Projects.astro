@@ -4,22 +4,63 @@ import projects from '../data/projects.js';
 <section id="projects" class="projects reveal">
   <p class="eyebrow">Browse my</p>
   <h2>Projects</h2>
-  <div class="project-grid">
-    {projects.map((p) => (
-      <article class="card project-card">
-        <img class="project-img" src={p.image} alt={p.title} />
-        <h3>{p.title}</h3>
-        <p class="project-desc">{p.description}</p>
-        <ul class="tags">
-          {p.tags.map((t) => <li>{t}</li>)}
-        </ul>
-        <div class="project-links">
-          <a class="btn btn-outline" href={p.repoUrl} target="_blank" rel="noreferrer">Code</a>
-          {p.liveUrl && (
-            <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
-          )}
-        </div>
-      </article>
-    ))}
+  <div class="project-carousel">
+    <button type="button" class="carousel-btn prev" aria-label="Previous projects">&#8249;</button>
+    <div class="project-grid">
+      {projects.map((p) => (
+        <article class="card project-card">
+          <img class="project-img" src={p.image} alt={p.title} />
+          <h3>{p.title}</h3>
+          <p class="project-desc">{p.description}</p>
+          <ul class="tags">
+            {p.tags.map((t) => <li>{t}</li>)}
+          </ul>
+          <div class="project-links">
+            <a class="btn btn-outline" href={p.repoUrl} target="_blank" rel="noreferrer">Code</a>
+            {p.liveUrl && (
+              <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+    <button type="button" class="carousel-btn next" aria-label="Next projects">&#8250;</button>
   </div>
 </section>
+
+<style>
+  .project-carousel { position: relative; }
+  .carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
+    font-size: 1.6rem; line-height: 1; cursor: pointer;
+    transition: all 200ms ease;
+  }
+  .carousel-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .carousel-btn.prev { left: -8px; }
+  .carousel-btn.next { right: -8px; }
+  @media (max-width: 600px) {
+    .carousel-btn.prev { left: 0; }
+    .carousel-btn.next { right: 0; }
+  }
+</style>
+
+<script>
+  const wrap = document.querySelector('.project-carousel');
+  const grid = wrap?.querySelector('.project-grid');
+  const card = grid?.querySelector('.project-card');
+  function step() {
+    if (!grid || !card) return 320;
+    const gap = parseFloat(getComputedStyle(grid).columnGap || '24') || 24;
+    return card.getBoundingClientRect().width + gap;
+  }
+  wrap?.querySelector('.carousel-btn.prev')?.addEventListener('click', () => {
+    grid?.scrollBy({ left: -step(), behavior: 'smooth' });
+  });
+  wrap?.querySelector('.carousel-btn.next')?.addEventListener('click', () => {
+    grid?.scrollBy({ left: step(), behavior: 'smooth' });
+  });
+</script>
