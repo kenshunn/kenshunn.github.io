@@ -1,21 +1,27 @@
 ---
 import skills from '../data/skills.js';
 
-// shields needs '-' doubled; everything else (#, /, +, spaces) via encodeURIComponent.
 const enc = (s) => encodeURIComponent(s).replace(/-/g, '--');
 const badgeUrl = (s) => {
   let url = `https://img.shields.io/badge/${enc(s.name)}-${s.color || '555555'}?style=for-the-badge`;
   if (s.logo) url += `&logo=${s.logo}&logoColor=${s.logoColor || 'white'}`;
   return url;
 };
+const groupData = (g) =>
+  JSON.stringify(
+    g.items.map((s) => ({ name: s.name, level: s.level, detail: s.detail, color: s.color, badge: badgeUrl(s) }))
+  );
 ---
 <section id="skills" class="skills reveal">
   <p class="eyebrow">Explore my</p>
   <h2>Skills</h2>
   <div class="skills-groups">
     {skills.map((group) => (
-      <div class="card">
-        <h3>{group.group}</h3>
+      <div class="card skill-group" role="button" tabindex="0" data-group={group.group} data-skills={groupData(group)}>
+        <div class="skill-group-head">
+          <h3>{group.group}</h3>
+          <span class="skill-group-hint">View all →</span>
+        </div>
         <div class="skill-list">
           {group.items.map((s) => (
             <button
@@ -25,6 +31,7 @@ const badgeUrl = (s) => {
               data-level={s.level}
               data-detail={s.detail}
               data-color={s.color}
+              data-badge={badgeUrl(s)}
               aria-label={`${s.name} details`}
             >
               <img class="skill-badge" src={badgeUrl(s)} alt={s.name} height="30" loading="lazy" />
