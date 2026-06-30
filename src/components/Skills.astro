@@ -1,9 +1,10 @@
 ---
 import skills from '../data/skills.js';
 
+// shields needs '-' doubled; everything else (#, /, +, spaces) via encodeURIComponent.
+const enc = (s) => encodeURIComponent(s).replace(/-/g, '--');
 const badgeUrl = (s) => {
-  const label = s.name.replace(/-/g, '--').replace(/ /g, '%20');
-  let url = `https://img.shields.io/badge/${label}-${s.color || '555555'}?style=for-the-badge`;
+  let url = `https://img.shields.io/badge/${enc(s.name)}-${enc(s.level || ' ')}-1f2937?style=for-the-badge&labelColor=${s.color || '555555'}`;
   if (s.logo) url += `&logo=${s.logo}&logoColor=${s.logoColor || 'white'}`;
   return url;
 };
