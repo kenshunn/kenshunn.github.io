@@ -4,8 +4,8 @@ const featured = certifications.filter((c) => c.featured);
 const rest = certifications.filter((c) => !c.featured);
 
 const education = [
-  { school: 'Mapúa Malayan Colleges Laguna', degree: 'BS Information Technology', period: '2022 – Present', note: "Dean's Lister", logo: '/images/edu-cap.svg' },
-  { school: 'Far Eastern University Alabang', degree: 'STEM — Information Technology', period: '2020 – 2022', note: 'Graduated with Honors', logo: '/images/edu-cap.svg' },
+  { school: 'Mapúa Malayan Colleges Laguna', degree: 'BS Information Technology', period: '2022 – Present', note: "Dean's Lister", logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3c/MMCL_Wordmark.svg/250px-MMCL_Wordmark.svg.png' },
+  { school: 'Far Eastern University Alabang', degree: 'STEM — Information Technology', period: '2020 – 2022', note: 'Graduated with Honors', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d7/Far_Easter_University_Logo.svg/250px-Far_Easter_University_Logo.svg.png' },
 ];
 ---
 <section id="about" class="about reveal">
@@ -80,7 +80,7 @@ const education = [
   .cert-title { font-size: 1.4rem; margin-bottom: 1.25rem; }
   .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2.5rem; }
   .edu-card { display: flex; gap: 1rem; align-items: center; }
-  .edu-logo { width: 48px; height: 48px; object-fit: contain; flex: none; }
+  .edu-logo { width: auto; max-width: 96px; height: 48px; object-fit: contain; flex: none; }
   .edu-card h4 { font-size: 1.05rem; }
   .edu-degree { margin: 0.2rem 0 0; }
   .edu-meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
