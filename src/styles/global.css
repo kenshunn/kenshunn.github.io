@@ -16,29 +16,17 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 
-/* Full-page reels-style scroll-snap — one panel per swipe. */
-html { scroll-snap-type: y mandatory; }
+/* Sticky stacking panels — each section pins, the next slides over it.
+   You don't see the previous panel until you scroll back up. */
 main > section,
 main > .coursework {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  position: sticky;
+  top: 0;
   min-height: 100vh;
-}
-
-/* Scroll-driven fade: each panel fades in entering, out leaving (previous disappears).
-   Progressive enhancement — only where view() timelines are supported. */
-@supports (animation-timeline: view()) {
-  main > section,
-  main > .coursework {
-    animation: panel-fade linear both;
-    animation-timeline: view();
-    animation-range: cover 0% cover 100%;
-  }
-  @keyframes panel-fade {
-    0% { opacity: 0; transform: scale(0.98); }
-    12%, 88% { opacity: 1; transform: none; }
-    100% { opacity: 0; transform: scale(0.98); }
-  }
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
