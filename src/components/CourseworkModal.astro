@@ -1,0 +1,72 @@
+---
+import coursework from '../data/coursework.js';
+---
+<div class="cw-modal" id="coursework-modal" role="dialog" aria-modal="true" aria-label="All coursework" hidden>
+  <div class="cw-backdrop" data-cw-close></div>
+  <div class="cw-box">
+    <div class="cw-head">
+      <h3>Coursework &amp; Exercises</h3>
+      <button type="button" class="cw-close" aria-label="Close" data-cw-close>&times;</button>
+    </div>
+    <div class="cw-grid">
+      {coursework.map((c) => (
+        <article class="cw-card">
+          <h4>{c.title}</h4>
+          <ul class="tags">
+            {c.tags.map((t) => <li>{t}</li>)}
+          </ul>
+          <div class="cw-links">
+            <button type="button" class="btn btn-outline repo-open" data-repo={c.repoUrl} data-title={c.title}>Code</button>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .cw-modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .cw-modal[hidden] { display: none; }
+  .cw-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(2px); }
+  .cw-box {
+    position: relative; display: flex; flex-direction: column;
+    width: min(820px, 100%); max-height: 88vh;
+    background: var(--surface); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+    border-radius: 1rem; overflow: hidden;
+  }
+  .cw-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem; border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
+  }
+  .cw-close { background: none; border: none; color: var(--muted); font-size: 1.7rem; line-height: 1; cursor: pointer; }
+  .cw-close:hover { color: var(--text); }
+  .cw-grid {
+    overflow-y: auto; padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 97%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 97%, transparent 100%);
+  }
+  .cw-grid::-webkit-scrollbar { display: none; }
+  @media (max-width: 640px) { .cw-grid { grid-template-columns: 1fr; } }
+  .cw-card {
+    display: flex; flex-direction: column;
+    background: var(--bg); border-radius: 0.85rem; padding: 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--muted) 25%, transparent);
+  }
+  .cw-card h4 { margin-bottom: 0.6rem; }
+  .cw-links { display: flex; margin-top: auto; justify-content: flex-end; }
+  .cw-links .btn { padding: 0.45rem 0.95rem; }
+</style>
+
+<script>
+  const modal = document.getElementById('coursework-modal');
+  const toggle = document.getElementById('coursework-grid-toggle');
+  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
+  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
+  toggle?.addEventListener('click', open);
+  modal?.querySelectorAll('[data-cw-close]').forEach((el) => el.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
+  });
+</script>
