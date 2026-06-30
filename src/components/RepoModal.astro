@@ -1,0 +1,110 @@
+---
+---
+<div class="repo-modal" id="repo-modal" role="dialog" aria-modal="true" aria-label="Repository preview" hidden>
+  <div class="repo-modal-backdrop" data-repo-close></div>
+  <div class="repo-modal-box">
+    <div class="repo-modal-head">
+      <h3 id="repo-modal-title">Repository</h3>
+      <button type="button" class="repo-modal-close" aria-label="Close" data-repo-close>&times;</button>
+    </div>
+    <div class="repo-readme" id="repo-readme"></div>
+    <div class="repo-modal-foot">
+      <a class="btn btn-primary" id="repo-visit" href="#" target="_blank" rel="noreferrer">Visit Repository</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .repo-modal {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .repo-modal[hidden] { display: none; }
+  .repo-modal-backdrop {
+    position: absolute; inset: 0; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(2px);
+  }
+  .repo-modal-box {
+    position: relative; display: flex; flex-direction: column;
+    width: min(820px, 100%); height: min(85vh, 100%);
+    background: var(--surface); color: var(--text);
+    border-radius: 1rem; overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+  }
+  .repo-modal-head, .repo-modal-foot {
+    display: flex; align-items: center; padding: 1rem 1.25rem;
+  }
+  .repo-modal-head { justify-content: space-between; border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, transparent); }
+  .repo-modal-foot { justify-content: center; border-top: 1px solid color-mix(in srgb, var(--muted) 20%, transparent); }
+  .repo-modal-close { background: none; border: none; color: var(--muted); font-size: 1.75rem; line-height: 1; cursor: pointer; }
+  .repo-modal-close:hover { color: var(--text); }
+  .repo-readme { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; }
+  .repo-readme img { max-width: 100%; height: auto; }
+  .repo-readme pre {
+    background: var(--bg); padding: 1rem; border-radius: 0.5rem; overflow-x: auto;
+  }
+  .repo-readme code { font-family: ui-monospace, monospace; font-size: 0.9em; }
+  .repo-readme h1, .repo-readme h2 { border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, transparent); padding-bottom: 0.3em; margin: 1em 0 0.5em; }
+  .repo-readme h3, .repo-readme h4 { margin: 1em 0 0.5em; }
+  .repo-readme p, .repo-readme ul, .repo-readme ol, .repo-readme table { margin-bottom: 0.75em; }
+  .repo-readme a { color: var(--accent); }
+  .repo-state { color: var(--muted); text-align: center; padding: 2rem; }
+</style>
+
+<script>
+  const modal = document.getElementById('repo-modal');
+  const titleEl = document.getElementById('repo-modal-title');
+  const bodyEl = document.getElementById('repo-readme');
+  const visitEl = document.getElementById('repo-visit');
+
+  function parseRepo(url) {
+    const m = (url || '').replace(/\.git$/, '').match(/github\.com\/([^/]+)\/([^/?#]+)/i);
+    return m ? { owner: m[1], repo: m[2] } : null;
+  }
+
+  function openModal() {
+    modal?.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal?.setAttribute('hidden', '');
+    document.body.style.overflow = '';
+  }
+
+  async function loadReadme(owner, repo) {
+    if (!bodyEl) return;
+    bodyEl.innerHTML = '<p class="repo-state">Loading preview…</p>';
+    try {
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`, {
+        headers: { Accept: 'application/vnd.github.html' },
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const html = await res.text();
+      bodyEl.innerHTML = html;
+      bodyEl.scrollTop = 0;
+      bodyEl.querySelectorAll('a').forEach((a) => {
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noreferrer');
+      });
+    } catch (err) {
+      bodyEl.innerHTML =
+        '<p class="repo-state">Preview unavailable. Open the repository directly with the button below.</p>';
+    }
+  }
+
+  document.querySelectorAll('.repo-open').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const url = btn.getAttribute('data-repo');
+      const info = parseRepo(url);
+      if (titleEl) titleEl.textContent = btn.getAttribute('data-title') || 'Repository';
+      if (visitEl) visitEl.setAttribute('href', url || '#');
+      openModal();
+      if (info) loadReadme(info.owner, info.repo);
+      else if (bodyEl) bodyEl.innerHTML = '<p class="repo-state">Open the repository with the button below.</p>';
+    });
+  });
+
+  modal?.querySelectorAll('[data-repo-close]').forEach((el) => el.addEventListener('click', closeModal));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) closeModal();
+  });
+</script>

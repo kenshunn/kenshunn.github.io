@@ -17,10 +17,10 @@ import projects from '../data/projects.js';
               {p.tags.map((t) => <li>{t}</li>)}
             </ul>
             <div class="project-links">
-              <a class="btn btn-outline" href={p.repoUrl} target="_blank" rel="noreferrer">Code</a>
               {p.liveUrl && (
                 <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
               )}
+              <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
             </div>
           </article>
         ))}
