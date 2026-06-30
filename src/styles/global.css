@@ -86,10 +86,8 @@ h2 { font-size: 2.25rem; margin-bottom: 2rem; }
 .bio { color: var(--muted); max-width: 720px; }
 @media (max-width: 600px) { .about-grid { grid-template-columns: 1fr; } }
 .skills-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.skill-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem; }
-.skill-item { display: flex; flex-direction: column; }
-.skill-name { font-weight: 600; }
-.skill-level { color: var(--muted); font-size: 0.9rem; }
+.skill-list { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+.skill-badge { height: 30px; border-radius: 4px; }
 @media (max-width: 600px) { .skills-groups { grid-template-columns: 1fr; } }
 .project-viewport {
   overflow: hidden;

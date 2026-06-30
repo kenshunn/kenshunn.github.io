@@ -2,15 +2,15 @@ import { test, expect } from 'vitest';
 import skills from '../src/data/skills.js';
 import projects from '../src/data/projects.js';
 
-test('skills has expected groups with items', () => {
+test('skills has expected groups with badge items', () => {
   const groups = skills.map((g) => g.group);
-  expect(groups).toContain('Networking & Infrastructure');
   expect(groups).toContain('Languages');
+  expect(groups).toContain('Databases');
   skills.forEach((g) => {
     expect(Array.isArray(g.items)).toBe(true);
     g.items.forEach((s) => {
       expect(typeof s.name).toBe('string');
-      expect(typeof s.level).toBe('string');
+      expect(typeof s.color).toBe('string'); // brand color drives the badge
     });
   });
 });
