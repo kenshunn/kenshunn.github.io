@@ -7,7 +7,7 @@
       <h3>Curriculum Vitae</h3>
       <button type="button" class="cv-modal-close" aria-label="Close" data-cv-close>&times;</button>
     </div>
-    <iframe class="cv-frame" src="/cv.pdf" title="Curriculum Vitae"></iframe>
+    <div class="cv-pages" id="cv-pages"><p class="cv-state">Loading preview…</p></div>
     <div class="cv-modal-foot">
       <a class="btn btn-primary" href="/cv.pdf" download="Ken-Aaron-De-Martin-CV.pdf">Download CV</a>
       <a class="btn btn-outline" href="/cv.pdf" target="_blank" rel="noreferrer">Open in new tab</a>
@@ -46,7 +46,15 @@
     font-size: 1.75rem; line-height: 1; cursor: pointer;
   }
   .cv-modal-close:hover { color: var(--text); }
-  .cv-frame { flex: 1; width: 100%; border: none; background: #fff; }
+  .cv-pages {
+    flex: 1; overflow-y: auto; background: #525659;
+    padding: 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
+  }
+  .cv-pages canvas {
+    width: 100%; max-width: 820px; height: auto;
+    border-radius: 4px; box-shadow: 0 6px 24px rgba(0,0,0,0.4); background: #fff;
+  }
+  .cv-state { color: #e6edf3; padding: 2rem; }
   .cv-modal-foot {
     display: flex; justify-content: center; gap: 0.75rem;
     padding: 1rem 1.25rem;
@@ -57,10 +65,39 @@
 <script>
   const modal = document.getElementById('cv-modal');
   const opener = document.getElementById('cv-open');
+  const pages = document.getElementById('cv-pages');
+
+  const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.mjs';
+  const WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs';
+  let rendered = false;
+
+  async function renderCv() {
+    if (rendered || !pages) return;
+    rendered = true;
+    try {
+      const pdfjs = await import(/* @vite-ignore */ PDFJS);
+      pdfjs.GlobalWorkerOptions.workerSrc = WORKER;
+      const pdf = await pdfjs.getDocument('/cv.pdf').promise;
+      pages.innerHTML = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        pages.appendChild(canvas);
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      }
+    } catch (err) {
+      rendered = false;
+      pages.innerHTML = '<p class="cv-state">Preview unavailable — use the buttons below to view the CV.</p>';
+    }
+  }
 
   function openModal() {
     modal?.removeAttribute('hidden');
     document.body.style.overflow = 'hidden';
+    renderCv();
   }
   function closeModal() {
     modal?.setAttribute('hidden', '');
