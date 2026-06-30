@@ -87,7 +87,13 @@ h2 { font-size: 2.25rem; margin-bottom: 2rem; }
 @media (max-width: 600px) { .about-grid { grid-template-columns: 1fr; } }
 .skills-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 .skill-list { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
-.skill-badge { height: 30px; border-radius: 4px; }
+.skill-trigger {
+  background: none; border: none; padding: 0; line-height: 0; cursor: pointer;
+  border-radius: 4px; transition: transform 150ms ease, filter 150ms ease;
+}
+.skill-trigger:hover { transform: translateY(-2px); filter: brightness(1.12); }
+.skill-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.skill-badge { height: 30px; border-radius: 4px; display: block; }
 @media (max-width: 600px) { .skills-groups { grid-template-columns: 1fr; } }
 .project-viewport {
   overflow: hidden;

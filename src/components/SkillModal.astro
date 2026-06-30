@@ -1,0 +1,82 @@
+---
+---
+<div class="skill-modal" id="skill-modal" role="dialog" aria-modal="true" aria-label="Skill details" hidden>
+  <div class="skill-modal-backdrop" data-skill-close></div>
+  <div class="skill-modal-box">
+    <button type="button" class="skill-modal-close" aria-label="Close" data-skill-close>&times;</button>
+    <h3 id="skill-modal-title">Skill</h3>
+    <div class="skill-level-row">
+      <span id="skill-modal-level" class="skill-level-tag">Level</span>
+    </div>
+    <div class="skill-bar"><div class="skill-bar-fill" id="skill-bar-fill"></div></div>
+    <p id="skill-modal-detail" class="skill-modal-detail"></p>
+  </div>
+</div>
+
+<style>
+  .skill-modal {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .skill-modal[hidden] { display: none; }
+  .skill-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(2px); }
+  .skill-modal-box {
+    position: relative; width: min(440px, 100%);
+    background: var(--surface); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+    border-radius: 1rem; padding: 1.5rem 1.5rem 1.75rem;
+  }
+  .skill-modal-close {
+    position: absolute; top: 0.75rem; right: 1rem;
+    background: none; border: none; color: var(--muted); font-size: 1.6rem; line-height: 1; cursor: pointer;
+  }
+  .skill-modal-close:hover { color: var(--text); }
+  #skill-modal-title { font-size: 1.5rem; margin: 0 1.5rem 0.75rem 0; }
+  .skill-level-row { margin-bottom: 0.5rem; }
+  .skill-level-tag { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  .skill-bar {
+    height: 8px; border-radius: 4px; overflow: hidden;
+    background: color-mix(in srgb, var(--muted) 25%, transparent); margin-bottom: 1rem;
+  }
+  .skill-bar-fill { height: 100%; width: 0; border-radius: 4px; transition: width 400ms ease; }
+  .skill-modal-detail { color: var(--muted); line-height: 1.6; }
+</style>
+
+<script>
+  const modal = document.getElementById('skill-modal');
+  const titleEl = document.getElementById('skill-modal-title');
+  const levelEl = document.getElementById('skill-modal-level');
+  const fillEl = document.getElementById('skill-bar-fill');
+  const detailEl = document.getElementById('skill-modal-detail');
+
+  const PERCENT = { Certified: 95, Proficient: 78, Familiar: 50 };
+
+  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
+  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
+
+  document.querySelectorAll('.skill-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const name = btn.getAttribute('data-name') || 'Skill';
+      const level = btn.getAttribute('data-level') || '';
+      const detail = btn.getAttribute('data-detail') || '';
+      const color = '#' + (btn.getAttribute('data-color') || '6366f1');
+
+      if (titleEl) { titleEl.textContent = name; titleEl.style.color = color; }
+      if (levelEl) levelEl.textContent = level ? `Proficiency: ${level}` : '';
+      if (detailEl) detailEl.textContent = detail;
+      open();
+      if (fillEl) {
+        fillEl.style.background = color;
+        fillEl.style.width = '0';
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => { fillEl.style.width = (PERCENT[level] || 60) + '%'; })
+        );
+      }
+    });
+  });
+
+  modal?.querySelectorAll('[data-skill-close]').forEach((el) => el.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
+  });
+</script>
