@@ -17,7 +17,7 @@ const projects = [
     tags: ['Kotlin', 'Jetpack Compose', 'BLE', 'MFA'],
     repoUrl: 'https://github.com/jgtrea/ClockIn-Application',
     liveUrl: '',
-    image: '/images/clockin.svg',
+    image: 'https://raw.githubusercontent.com/jgtrea/ClockIn-Application/web/assets/img/clockin-logo.svg',
   },
   {
     title: "Rubik's Cube Cipher",
