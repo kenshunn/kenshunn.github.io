@@ -16,15 +16,13 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 
-/* Full-page scroll-snap (section-locked). Desktop only — mobile scrolls freely. */
-@media (min-width: 768px) {
-  html { scroll-snap-type: y proximity; }
-  main > section,
-  main > .coursework {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    min-height: 100vh;
-  }
+/* Full-page reels-style scroll-snap — one panel per swipe. */
+html { scroll-snap-type: y mandatory; }
+main > section,
+main > .coursework {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: 100vh;
 }
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
