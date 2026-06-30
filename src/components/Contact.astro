@@ -1,0 +1,35 @@
+---
+---
+<section id="contact" class="contact reveal">
+  <p class="eyebrow">Get in touch</p>
+  <h2>Contact Me</h2>
+  <form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+    <input name="name" type="text" placeholder="Your name" aria-label="Name" />
+    <input name="email" type="email" placeholder="Your email" aria-label="Email" />
+    <textarea name="message" rows="5" placeholder="Your message" aria-label="Message"></textarea>
+    <p class="form-error" role="alert"></p>
+    <button type="submit" class="btn btn-primary">Send</button>
+  </form>
+  <div class="contact-fallback">
+    <a href="mailto:aaron.11demartin@gmail.com">aaron.11demartin@gmail.com</a>
+    <span>+63 998 545 1812</span>
+  </div>
+</section>
+
+<script>
+  import validateContact from '../scripts/validate.js';
+  const form = document.querySelector('.contact-form');
+  const alert = document.querySelector('.contact-form .form-error');
+  form?.addEventListener('submit', (e) => {
+    const data = {
+      name: form.name.value,
+      email: form.email.value,
+      message: form.message.value,
+    };
+    const { valid, error } = validateContact(data);
+    if (!valid) {
+      e.preventDefault();
+      if (alert) alert.textContent = error;
+    }
+  });
+</script>
