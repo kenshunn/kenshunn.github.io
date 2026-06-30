@@ -57,12 +57,16 @@ import projects from '../data/projects.js';
   const track = wrap?.querySelector('.project-track');
 
   if (wrap && track && track.children.length > 0) {
-    const EASE = 0.2;     // glide stiffness — higher = snappier
-    let pos = 0;          // current translateX (px)
-    let target = 0;       // where pos is gliding to
+    const EASE = 0.2;      // arrow glide stiffness
+    const FRICTION = 0.92; // drag-release momentum decay
+    const MAX_V = 34;      // speed cap (px/frame) for drag + fling
+    let pos = 0;           // current translateX (px)
+    let target = 0;        // arrow glide goal
+    let vel = 0;           // momentum velocity (px/frame)
+    let mode = 'idle';     // 'glide' (arrows) | 'inertia' (drag release)
     let raf = null;
     let dragging = false;
-    let startX = 0, startPos = 0, moved = 0;
+    let startX = 0, startPos = 0, moved = 0, lastX = 0;
 
     const step = () => {
       const card = track.querySelector('.project-card');
@@ -70,39 +74,47 @@ import projects from '../data/projects.js';
       return card.getBoundingClientRect().width + gap;
     };
     const setX = (x) => { track.style.transform = `translateX(${x}px)`; };
+    const clamp = (v, m) => Math.max(-m, Math.min(m, v));
 
-    // Recycle cards through the DOM to keep pos within (-step, 0]. Each rotation
-    // shifts BOTH pos and target by one card, so the remaining distance and the
-    // on-screen pixels are preserved -> seamless infinite loop in both directions.
+    // Recycle cards so pos stays within (-step, 0]; shifting pos AND target together
+    // keeps pixels + remaining distance intact -> seamless infinite loop, no snapping.
     const rebalance = () => {
       const s = step();
       let g = 0;
-      while (pos <= -s && g++ < 300) { track.appendChild(track.firstElementChild); pos += s; target += s; }
-      while (pos > 0 && g++ < 300) { track.insertBefore(track.lastElementChild, track.firstElementChild); pos -= s; target -= s; }
+      while (pos <= -s && g++ < 400) { track.appendChild(track.firstElementChild); pos += s; target += s; }
+      while (pos > 0 && g++ < 400) { track.insertBefore(track.lastElementChild, track.firstElementChild); pos -= s; target -= s; }
     };
 
     const tick = () => {
-      pos += (target - pos) * EASE;
-      if (Math.abs(target - pos) < 0.5) pos = target;
+      if (mode === 'glide') {
+        pos += (target - pos) * EASE;
+        if (Math.abs(target - pos) < 0.5) { pos = target; mode = 'idle'; }
+      } else if (mode === 'inertia') {
+        pos += vel;
+        vel *= FRICTION;
+        if (Math.abs(vel) < 0.15) { vel = 0; mode = 'idle'; }
+      }
       rebalance();
       setX(pos);
-      raf = pos === target ? null : requestAnimationFrame(tick);
+      raf = mode === 'idle' ? null : requestAnimationFrame(tick);
     };
-    const glide = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    const run = () => { if (!raf) raf = requestAnimationFrame(tick); };
 
-    // --- Arrows: each press pushes the target one more card; spam = fast multi-card glide ---
+    // --- Arrows: glide one card per press; spam accumulates for a fast multi-card glide.
     const nudge = (dir) => {
       if (dragging) return;
-      target += dir > 0 ? -step() : step();
-      glide();
+      const base = mode === 'glide' ? target : pos;
+      target = base + (dir > 0 ? -step() : step());
+      mode = 'glide';
+      run();
     };
     wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => nudge(1));
     wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => nudge(-1));
 
-    // --- Pointer drag (mouse hold + touch swipe), shares the same physics ---
+    // --- Drag (mouse hold + touch swipe): free, no snap; release flings with capped speed.
     const onDown = (e) => {
-      dragging = true; moved = 0;
-      startX = e.clientX; startPos = pos;
+      dragging = true; moved = 0; vel = 0; mode = 'idle';
+      startX = e.clientX; startPos = pos; lastX = e.clientX;
       if (raf) { cancelAnimationFrame(raf); raf = null; }
       track.classList.add('grabbing');
       track.setPointerCapture?.(e.pointerId);
@@ -111,6 +123,8 @@ import projects from '../data/projects.js';
       if (!dragging) return;
       const dx = e.clientX - startX;
       moved = Math.max(moved, Math.abs(dx));
+      vel = clamp(e.clientX - lastX, MAX_V); // speed-limited follow
+      lastX = e.clientX;
       pos = startPos + dx;
       target = pos;
       rebalance();
@@ -120,10 +134,9 @@ import projects from '../data/projects.js';
       if (!dragging) return;
       dragging = false;
       track.classList.remove('grabbing');
-      const s = step();
-      rebalance();
-      target = pos < -s / 2 ? -s : 0; // snap to nearest card, then glide
-      glide();
+      vel = clamp(vel, MAX_V); // fling capped; rests wherever momentum decays — no forced snap
+      mode = 'inertia';
+      run();
     };
     track.addEventListener('pointerdown', onDown);
     track.addEventListener('pointermove', onMove);
