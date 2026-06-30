@@ -69,20 +69,25 @@ import projects from '../data/projects.js';
     grid.appendChild(tail);
     grid.insertBefore(head, grid.firstChild);
 
-    const block = () => grid.scrollWidth / 3; // width of one set
+    const n = originals.length;
+    // Width of one set, measured from element offsets so grid padding doesn't skew it.
+    const block = () => grid.children[n].offsetLeft - grid.children[0].offsetLeft;
     const step = () => {
       const gap = parseFloat(getComputedStyle(grid).columnGap || '24') || 24;
       return grid.querySelector('.project-card').getBoundingClientRect().width + gap;
     };
 
-    // Start centered on the real (middle) set.
-    requestAnimationFrame(() => { grid.scrollLeft = block(); });
+    // Start on the real (middle) set.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => { grid.scrollLeft = block(); })
+    );
 
-    // After scrolling settles, jump by one block if we've drifted into a clone set.
+    // After scrolling settles, jump by one set if we've drifted into a clone set.
     const normalize = () => {
       const b = block();
+      if (b <= 0) return;
       if (grid.scrollLeft >= b * 2) grid.scrollLeft -= b;
-      else if (grid.scrollLeft < b - 1) grid.scrollLeft += b;
+      else if (grid.scrollLeft < b) grid.scrollLeft += b;
     };
     let t;
     grid.addEventListener('scroll', () => {
