@@ -35,7 +35,7 @@ const projects = [
     tags: ['JavaScript', 'REST API', 'Auth'],
     repoUrl: 'https://github.com/IanSalandanan/TwitterClone',
     liveUrl: '',
-    image: '/images/oasis.svg',
+    image: 'https://raw.githubusercontent.com/IanSalandanan/TwitterClone/main/TwitterCloneUi/assets/oasislogo.jpg',
   },
   {
     title: 'CareBy',
