@@ -3,13 +3,11 @@
 <div class="skill-modal" id="skill-modal" role="dialog" aria-modal="true" aria-label="Skill details" hidden>
   <div class="skill-modal-backdrop" data-skill-close></div>
   <div class="skill-modal-box">
-    <button type="button" class="skill-modal-close" aria-label="Close" data-skill-close>&times;</button>
-    <h3 id="skill-modal-title">Skill</h3>
-    <div class="skill-level-row">
-      <span id="skill-modal-level" class="skill-level-tag">Level</span>
+    <div class="skill-modal-head">
+      <h3 id="skill-modal-title">Skills</h3>
+      <button type="button" class="skill-modal-close" aria-label="Close" data-skill-close>&times;</button>
     </div>
-    <div class="skill-bar"><div class="skill-bar-fill" id="skill-bar-fill"></div></div>
-    <p id="skill-modal-detail" class="skill-modal-detail"></p>
+    <div class="skill-modal-body" id="skill-modal-body"></div>
   </div>
 </div>
 
@@ -21,57 +19,83 @@
   .skill-modal[hidden] { display: none; }
   .skill-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(2px); }
   .skill-modal-box {
-    position: relative; width: min(440px, 100%);
+    position: relative; display: flex; flex-direction: column;
+    width: min(580px, 100%); max-height: 82vh;
     background: var(--surface); color: var(--text);
     border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
-    border-radius: 1rem; padding: 1.5rem 1.5rem 1.75rem;
+    border-radius: 1rem; overflow: hidden;
   }
-  .skill-modal-close {
-    position: absolute; top: 0.75rem; right: 1rem;
-    background: none; border: none; color: var(--muted); font-size: 1.6rem; line-height: 1; cursor: pointer;
+  .skill-modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem; border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
   }
+  .skill-modal-close { background: none; border: none; color: var(--muted); font-size: 1.7rem; line-height: 1; cursor: pointer; }
   .skill-modal-close:hover { color: var(--text); }
-  #skill-modal-title { font-size: 1.5rem; margin: 0 1.5rem 0.75rem 0; }
-  .skill-level-row { margin-bottom: 0.5rem; }
-  .skill-level-tag { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
-  .skill-bar {
-    height: 8px; border-radius: 4px; overflow: hidden;
-    background: color-mix(in srgb, var(--muted) 25%, transparent); margin-bottom: 1rem;
-  }
-  .skill-bar-fill { height: 100%; width: 0; border-radius: 4px; transition: width 400ms ease; }
-  .skill-modal-detail { color: var(--muted); line-height: 1.6; }
+  .skill-modal-body { overflow-y: auto; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.4rem; }
+  .skill-row { display: flex; flex-direction: column; gap: 0.45rem; }
+  .skill-row-top { display: flex; align-items: center; gap: 0.75rem; }
+  .skill-row-top img { height: 28px; border-radius: 4px; }
+  .skill-row-level { font-size: 0.8rem; font-weight: 600; color: var(--accent); }
+  .skill-bar { height: 7px; border-radius: 4px; overflow: hidden; background: color-mix(in srgb, var(--muted) 25%, transparent); }
+  .skill-bar-fill { height: 100%; border-radius: 4px; }
+  .skill-row p { color: var(--muted); line-height: 1.55; margin: 0; }
 </style>
 
 <script>
   const modal = document.getElementById('skill-modal');
   const titleEl = document.getElementById('skill-modal-title');
-  const levelEl = document.getElementById('skill-modal-level');
-  const fillEl = document.getElementById('skill-bar-fill');
-  const detailEl = document.getElementById('skill-modal-detail');
-
+  const bodyEl = document.getElementById('skill-modal-body');
   const PERCENT = { Certified: 95, Proficient: 78, Familiar: 50 };
 
   const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
   const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
+  const esc = (s) =>
+    (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  const rowHtml = (s) => {
+    const pct = PERCENT[s.level] || 60;
+    const color = '#' + (s.color || '6366f1');
+    return `
+      <div class="skill-row">
+        <div class="skill-row-top">
+          <img src="${s.badge}" alt="${esc(s.name)}" />
+          <span class="skill-row-level">${esc(s.level || '')}</span>
+        </div>
+        <div class="skill-bar"><div class="skill-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <p>${esc(s.detail || '')}</p>
+      </div>`;
+  };
+
+  const render = (title, items) => {
+    if (titleEl) titleEl.textContent = title;
+    if (bodyEl) { bodyEl.innerHTML = items.map(rowHtml).join(''); bodyEl.scrollTop = 0; }
+    open();
+  };
+
+  // Whole group box -> all skills in that group.
+  document.querySelectorAll('.skill-group').forEach((card) => {
+    const openGroup = () => {
+      let items = [];
+      try { items = JSON.parse(card.getAttribute('data-skills') || '[]'); } catch (e) { items = []; }
+      render(card.getAttribute('data-group') || 'Skills', items);
+    };
+    card.addEventListener('click', openGroup);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGroup(); }
+    });
+  });
+
+  // Individual badge -> just that skill (stops the group handler from also firing).
   document.querySelectorAll('.skill-trigger').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const name = btn.getAttribute('data-name') || 'Skill';
-      const level = btn.getAttribute('data-level') || '';
-      const detail = btn.getAttribute('data-detail') || '';
-      const color = '#' + (btn.getAttribute('data-color') || '6366f1');
-
-      if (titleEl) { titleEl.textContent = name; titleEl.style.color = color; }
-      if (levelEl) levelEl.textContent = level ? `Proficiency: ${level}` : '';
-      if (detailEl) detailEl.textContent = detail;
-      open();
-      if (fillEl) {
-        fillEl.style.background = color;
-        fillEl.style.width = '0';
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => { fillEl.style.width = (PERCENT[level] || 60) + '%'; })
-        );
-      }
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      render(btn.getAttribute('data-name') || 'Skill', [{
+        name: btn.getAttribute('data-name'),
+        level: btn.getAttribute('data-level'),
+        detail: btn.getAttribute('data-detail'),
+        color: btn.getAttribute('data-color'),
+        badge: btn.getAttribute('data-badge'),
+      }]);
     });
   });
 
