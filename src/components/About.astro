@@ -1,6 +1,7 @@
 ---
 import certifications from '../data/certifications.js';
-const certs = [...certifications].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+const featured = certifications.filter((c) => c.featured);
+const rest = certifications.filter((c) => !c.featured);
 ---
 <section id="about" class="about reveal">
   <p class="eyebrow">Get to know more</p>
@@ -23,13 +24,32 @@ const certs = [...certifications].sort((a, b) => (b.featured ? 1 : 0) - (a.featu
   </div>
 
   <h3 class="cert-title">Certifications</h3>
+
+  {featured.length > 0 && (
+    <div class="featured-row">
+      {featured.map((c) => (
+        <article class="card featured-project">
+          <span class="featured-badge">★ Featured</span>
+          <img class="featured-img" src={c.logo} alt={`${c.issuer} logo`} draggable="false" />
+          <div class="featured-body">
+            <span class="cert-issuer">{c.issuer}</span>
+            <h3>{c.name}</h3>
+            <div class="project-links">
+              <a class="btn btn-outline" href={c.url} target="_blank" rel="noreferrer">View credential</a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+
   <div class="project-carousel">
     <button type="button" class="carousel-btn prev" aria-label="Previous certifications">&#8249;</button>
     <div class="project-viewport">
       <div class="project-track">
-        {certs.map((c) => (
+        {rest.map((c) => (
           <article class="card project-card cert-card">
-            {c.featured && <span class="featured-badge">★ Featured</span>}
+            <img class="cert-logo" src={c.logo} alt={`${c.issuer} logo`} />
             <span class="cert-issuer">{c.issuer}</span>
             <h4>{c.name}</h4>
             <div class="project-links">
@@ -47,7 +67,8 @@ const certs = [...certifications].sort((a, b) => (b.featured ? 1 : 0) - (a.featu
   .about-education { margin-bottom: 2rem; }
   .cert-title { font-size: 1.4rem; margin-bottom: 1.25rem; }
   .cert-card { position: relative; flex-basis: 280px; }
-  .cert-card .cert-issuer { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase; }
+  .cert-logo { width: 40px; height: 40px; object-fit: contain; margin-bottom: 0.75rem; }
+  .cert-issuer { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase; }
   .cert-card h4 { font-size: 1.05rem; margin: 0.35rem 0 0; }
   @media (max-width: 600px) { .cert-card { flex-basis: 80vw; } }
 </style>
