@@ -32,8 +32,7 @@ import projects from '../data/projects.js';
 
 <style>
   .project-carousel { position: relative; }
-  .project-track { touch-action: pan-y; cursor: grab; user-select: none; }
-  .project-track.grabbing { cursor: grabbing; }
+  .project-track { touch-action: pan-y; user-select: none; }
   .carousel-btn {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
     width: 44px; height: 44px; border-radius: 50%;
@@ -112,12 +111,12 @@ import projects from '../data/projects.js';
     wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => nudge(1));
     wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => nudge(-1));
 
-    // --- Drag (mouse hold + touch swipe): free, no snap; release flings with capped speed.
+    // --- Touch swipe only (mouse hold-drag removed; use arrows or trackpad instead).
     const onDown = (e) => {
+      if (e.pointerType === 'mouse') return;
       dragging = true; moved = 0; vel = 0; mode = 'idle';
       startX = e.clientX; startPos = pos; lastX = e.clientX;
       if (raf) { cancelAnimationFrame(raf); raf = null; }
-      track.classList.add('grabbing');
       track.setPointerCapture?.(e.pointerId);
     };
     const onMove = (e) => {
