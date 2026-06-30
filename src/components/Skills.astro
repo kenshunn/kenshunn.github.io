@@ -18,7 +18,17 @@ const badgeUrl = (s) => {
         <h3>{group.group}</h3>
         <div class="skill-list">
           {group.items.map((s) => (
-            <img class="skill-badge" src={badgeUrl(s)} alt={s.name} height="30" loading="lazy" />
+            <button
+              type="button"
+              class="skill-trigger"
+              data-name={s.name}
+              data-level={s.level}
+              data-detail={s.detail}
+              data-color={s.color}
+              aria-label={`${s.name} details`}
+            >
+              <img class="skill-badge" src={badgeUrl(s)} alt={s.name} height="30" loading="lazy" />
+            </button>
           ))}
         </div>
       </div>
