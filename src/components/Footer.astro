@@ -1,0 +1,14 @@
+---
+const links = [
+  { href: '#about', label: 'About' },
+  { href: '#skills', label: 'Skills' },
+  { href: '#projects', label: 'Projects' },
+  { href: '#contact', label: 'Contact' },
+];
+---
+<footer class="footer">
+  <ul class="footer-links">
+    {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+  </ul>
+  <p>Copyright © 2024 Ken De Martin. All Rights Reserved.</p>
+</footer>
