@@ -1,5 +1,12 @@
 ---
 import skills from '../data/skills.js';
+
+const badgeUrl = (s) => {
+  const label = s.name.replace(/-/g, '--').replace(/ /g, '%20');
+  let url = `https://img.shields.io/badge/${label}-${s.color || '555555'}?style=for-the-badge`;
+  if (s.logo) url += `&logo=${s.logo}&logoColor=${s.logoColor || 'white'}`;
+  return url;
+};
 ---
 <section id="skills" class="skills reveal">
   <p class="eyebrow">Explore my</p>
@@ -10,10 +17,7 @@ import skills from '../data/skills.js';
         <h3>{group.group}</h3>
         <div class="skill-list">
           {group.items.map((s) => (
-            <div class="skill-item">
-              <span class="skill-name">{s.name}</span>
-              <span class="skill-level">{s.level}</span>
-            </div>
+            <img class="skill-badge" src={badgeUrl(s)} alt={s.name} height="30" loading="lazy" />
           ))}
         </div>
       </div>
