@@ -1,0 +1,25 @@
+---
+import projects from '../data/projects.js';
+---
+<section id="projects" class="projects reveal">
+  <p class="eyebrow">Browse my</p>
+  <h2>Projects</h2>
+  <div class="project-grid">
+    {projects.map((p) => (
+      <article class="card project-card">
+        <img class="project-img" src={p.image} alt={p.title} />
+        <h3>{p.title}</h3>
+        <p class="project-desc">{p.description}</p>
+        <ul class="tags">
+          {p.tags.map((t) => <li>{t}</li>)}
+        </ul>
+        <div class="project-links">
+          <a class="btn btn-outline" href={p.repoUrl} target="_blank" rel="noreferrer">Code</a>
+          {p.liveUrl && (
+            <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
+          )}
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
