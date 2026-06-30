@@ -9,7 +9,8 @@ import projects from '../data/projects.js';
     <div class="project-viewport">
       <div class="project-track">
         {projects.map((p) => (
-          <article class="card project-card">
+          <article class={`card project-card${p.featured ? ' featured' : ''}`}>
+            {p.featured && <span class="featured-badge">★ Featured</span>}
             <img class="project-img" src={p.image} alt={p.title} draggable="false" />
             <h3>{p.title}</h3>
             <p class="project-desc">{p.description}</p>
@@ -33,6 +34,17 @@ import projects from '../data/projects.js';
 <style>
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
+  .project-card.featured {
+    position: relative;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 8px 30px -12px var(--accent);
+  }
+  .featured-badge {
+    position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
+    padding: 0.25rem 0.6rem; border-radius: 1rem;
+    background: var(--accent); color: #fff;
+  }
   .carousel-btn {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
     width: 44px; height: 44px; border-radius: 50%;

@@ -1,5 +1,16 @@
 const projects = [
   {
+    // Featured slot — replace with your highlighted project. Set featured: true
+    // on whichever entry you want pinned/badged.
+    title: 'Featured Project',
+    description: 'Your highlighted project goes here. Replace this placeholder with the project you want to feature.',
+    tags: ['Featured'],
+    repoUrl: 'https://github.com/kenshunn',
+    liveUrl: '',
+    image: '/images/placeholder.png',
+    featured: true,
+  },
+  {
     title: 'Clock In',
     description:
       'Proximity-aware attendance authentication using Bluetooth Low Energy beacons. Restricts app access to specific WiFi SSIDs, binds devices to accounts for a BYOD policy, and delivers real-time in-app notifications and user feedback.',
