@@ -10,7 +10,7 @@ import projects from '../data/projects.js';
       <div class="project-track">
         {projects.map((p) => (
           <article class="card project-card">
-            <img class="project-img" src={p.image} alt={p.title} />
+            <img class="project-img" src={p.image} alt={p.title} draggable="false" />
             <h3>{p.title}</h3>
             <p class="project-desc">{p.description}</p>
             <ul class="tags">
@@ -32,6 +32,8 @@ import projects from '../data/projects.js';
 
 <style>
   .project-carousel { position: relative; }
+  .project-track { touch-action: pan-y; cursor: grab; user-select: none; }
+  .project-track.grabbing { cursor: grabbing; }
   .carousel-btn {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
     width: 44px; height: 44px; border-radius: 50%;
@@ -55,65 +57,82 @@ import projects from '../data/projects.js';
   const track = wrap?.querySelector('.project-track');
 
   if (wrap && track && track.children.length > 0) {
-    const DURATION = 350; // ms, keep in sync with the inline transition below
-    let animating = false;
-    let queue = 0;
+    const EASE = 0.2;     // glide stiffness — higher = snappier
+    let pos = 0;          // current translateX (px)
+    let target = 0;       // where pos is gliding to
+    let raf = null;
+    let dragging = false;
+    let startX = 0, startPos = 0, moved = 0;
 
-    const stepWidth = () => {
+    const step = () => {
       const card = track.querySelector('.project-card');
       const gap = parseFloat(getComputedStyle(track).columnGap || '24') || 24;
       return card.getBoundingClientRect().width + gap;
     };
+    const setX = (x) => { track.style.transform = `translateX(${x}px)`; };
 
-    const move = (dir) => {
-      // dir = 1 (next) | -1 (prev)
-      if (dir > 0) {
-        // slide left by one card, then recycle the first card to the end.
-        track.style.transition = `transform ${DURATION}ms ease`;
-        track.style.transform = `translateX(${-stepWidth()}px)`;
-        const done = () => {
-          track.removeEventListener('transitionend', done);
-          track.style.transition = 'none';
-          track.appendChild(track.firstElementChild);
-          track.style.transform = 'translateX(0)';
-          track.getBoundingClientRect(); // force reflow
-          finish();
-        };
-        track.addEventListener('transitionend', done);
-      } else {
-        // pre-place last card at the front shifted off-screen, then slide to 0.
-        track.style.transition = 'none';
-        track.insertBefore(track.lastElementChild, track.firstElementChild);
-        track.style.transform = `translateX(${-stepWidth()}px)`;
-        track.getBoundingClientRect(); // force reflow
-        track.style.transition = `transform ${DURATION}ms ease`;
-        track.style.transform = 'translateX(0)';
-        const done = () => {
-          track.removeEventListener('transitionend', done);
-          finish();
-        };
-        track.addEventListener('transitionend', done);
-      }
+    // Recycle cards through the DOM to keep pos within (-step, 0]. Each rotation
+    // shifts BOTH pos and target by one card, so the remaining distance and the
+    // on-screen pixels are preserved -> seamless infinite loop in both directions.
+    const rebalance = () => {
+      const s = step();
+      let g = 0;
+      while (pos <= -s && g++ < 300) { track.appendChild(track.firstElementChild); pos += s; target += s; }
+      while (pos > 0 && g++ < 300) { track.insertBefore(track.lastElementChild, track.firstElementChild); pos -= s; target -= s; }
     };
 
-    let lastDir = 1;
-    const finish = () => {
-      animating = false;
-      if (queue !== 0) {
-        const dir = queue > 0 ? 1 : -1;
-        queue -= dir;
-        trigger(dir);
-      }
+    const tick = () => {
+      pos += (target - pos) * EASE;
+      if (Math.abs(target - pos) < 0.5) pos = target;
+      rebalance();
+      setX(pos);
+      raf = pos === target ? null : requestAnimationFrame(tick);
     };
+    const glide = () => { if (!raf) raf = requestAnimationFrame(tick); };
 
-    const trigger = (dir) => {
-      if (animating) { queue += dir; return; }
-      animating = true;
-      lastDir = dir;
-      move(dir);
+    // --- Arrows: each press pushes the target one more card; spam = fast multi-card glide ---
+    const nudge = (dir) => {
+      if (dragging) return;
+      target += dir > 0 ? -step() : step();
+      glide();
     };
+    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => nudge(1));
+    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => nudge(-1));
 
-    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => trigger(-1));
-    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => trigger(1));
+    // --- Pointer drag (mouse hold + touch swipe), shares the same physics ---
+    const onDown = (e) => {
+      dragging = true; moved = 0;
+      startX = e.clientX; startPos = pos;
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      track.classList.add('grabbing');
+      track.setPointerCapture?.(e.pointerId);
+    };
+    const onMove = (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      pos = startPos + dx;
+      target = pos;
+      rebalance();
+      setX(pos);
+    };
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      track.classList.remove('grabbing');
+      const s = step();
+      rebalance();
+      target = pos < -s / 2 ? -s : 0; // snap to nearest card, then glide
+      glide();
+    };
+    track.addEventListener('pointerdown', onDown);
+    track.addEventListener('pointermove', onMove);
+    track.addEventListener('pointerup', onUp);
+    track.addEventListener('pointercancel', onUp);
+
+    // Swallow the click that follows a real drag so card links don't fire mid-swipe.
+    track.addEventListener('click', (e) => {
+      if (moved > 6) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
   }
 </script>
