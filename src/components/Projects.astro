@@ -51,16 +51,50 @@ import projects from '../data/projects.js';
 <script>
   const wrap = document.querySelector('.project-carousel');
   const grid = wrap?.querySelector('.project-grid');
-  const card = grid?.querySelector('.project-card');
-  function step() {
-    if (!grid || !card) return 320;
-    const gap = parseFloat(getComputedStyle(grid).columnGap || '24') || 24;
-    return card.getBoundingClientRect().width + gap;
+
+  if (wrap && grid && grid.children.length > 0) {
+    // Clone the full set before and after the originals -> [clones][originals][clones]
+    // so scrolling can wrap seamlessly in both directions (cylinder loop).
+    const originals = Array.from(grid.children);
+    const clone = (n) => {
+      const c = n.cloneNode(true);
+      c.setAttribute('aria-hidden', 'true');
+      c.classList.add('clone');
+      return c;
+    };
+    const head = document.createDocumentFragment();
+    const tail = document.createDocumentFragment();
+    originals.forEach((n) => head.appendChild(clone(n)));
+    originals.forEach((n) => tail.appendChild(clone(n)));
+    grid.appendChild(tail);
+    grid.insertBefore(head, grid.firstChild);
+
+    const block = () => grid.scrollWidth / 3; // width of one set
+    const step = () => {
+      const gap = parseFloat(getComputedStyle(grid).columnGap || '24') || 24;
+      return grid.querySelector('.project-card').getBoundingClientRect().width + gap;
+    };
+
+    // Start centered on the real (middle) set.
+    requestAnimationFrame(() => { grid.scrollLeft = block(); });
+
+    // After scrolling settles, jump by one block if we've drifted into a clone set.
+    const normalize = () => {
+      const b = block();
+      if (grid.scrollLeft >= b * 2) grid.scrollLeft -= b;
+      else if (grid.scrollLeft < b - 1) grid.scrollLeft += b;
+    };
+    let t;
+    grid.addEventListener('scroll', () => {
+      clearTimeout(t);
+      t = setTimeout(normalize, 120);
+    });
+
+    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () =>
+      grid.scrollBy({ left: -step(), behavior: 'smooth' })
+    );
+    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () =>
+      grid.scrollBy({ left: step(), behavior: 'smooth' })
+    );
   }
-  wrap?.querySelector('.carousel-btn.prev')?.addEventListener('click', () => {
-    grid?.scrollBy({ left: -step(), behavior: 'smooth' });
-  });
-  wrap?.querySelector('.carousel-btn.next')?.addEventListener('click', () => {
-    grid?.scrollBy({ left: step(), behavior: 'smooth' });
-  });
 </script>
