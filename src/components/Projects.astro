@@ -148,6 +148,10 @@ const rest = projects.filter((p) => !p.featured);
     };
     const setX = (x) => { track.style.transform = `translateX(${x}px)`; };
     const clamp = (v, m) => Math.max(-m, Math.min(m, v));
+    const viewport = wrap.querySelector('.project-viewport');
+    const cardW = () => track.querySelector('.project-card').getBoundingClientRect().width;
+    // center the focused card in the viewport (neighbors peek on both sides)
+    const recenter = () => { pos = (viewport.clientWidth - cardW()) / 2; rebalance(); setX(pos); };
 
     // Recycle cards so pos stays within (-step, 0]; shifting pos AND target together
     // keeps pixels + remaining distance intact -> seamless infinite loop, no snapping.
@@ -183,6 +187,10 @@ const rest = projects.filter((p) => !p.featured);
     };
     wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => nudge(1));
     wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => nudge(-1));
+
+    // center on load and keep centered on resize
+    requestAnimationFrame(() => requestAnimationFrame(recenter));
+    window.addEventListener('resize', recenter);
 
     // --- Auto-advance every 10s; pause on hover and when the tab is hidden.
     let timer = null;
