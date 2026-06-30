@@ -70,7 +70,7 @@ const rest = projects.filter((p) => !p.featured);
 </section>
 
 <style is:global>
-  .projects-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .projects-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
   .projects-grid-toggle {
     flex: none; margin-top: 0.5rem;
     display: flex; align-items: center; justify-content: center;
@@ -192,9 +192,9 @@ const rest = projects.filter((p) => !p.featured);
     requestAnimationFrame(() => requestAnimationFrame(recenter));
     window.addEventListener('resize', recenter);
 
-    // --- Auto-advance every 10s; pause on hover and when the tab is hidden.
+    // --- Auto-advance every 5s; pause on hover and when the tab is hidden.
     let timer = null;
-    const startAuto = () => { if (!timer) timer = setInterval(() => nudge(1), 10000); };
+    const startAuto = () => { if (!timer) timer = setInterval(() => nudge(1), 5000); };
     const stopAuto = () => { if (timer) { clearInterval(timer); timer = null; } };
     startAuto();
     wrap.addEventListener('mouseenter', stopAuto);
