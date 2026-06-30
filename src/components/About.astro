@@ -1,19 +1,11 @@
 ---
+import certifications from '../data/certifications.js';
+const certs = [...certifications].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
 ---
 <section id="about" class="about reveal">
   <p class="eyebrow">Get to know more</p>
   <h2>About Me</h2>
-  <div class="about-grid">
-    <div class="card">
-      <h3>Education</h3>
-      <p>BS Information Technology — Mapúa Malayan Colleges Laguna (2022–Present), Dean's Lister</p>
-      <p>STEM, Information Technology — Far Eastern University Alabang (2020–2022), Graduated with Honors</p>
-    </div>
-    <div class="card">
-      <h3>Certifications</h3>
-      <p>CCNA · CompTIA Tech+ · Google Cloud Skill Boost</p>
-    </div>
-  </div>
+
   <p class="bio">
     I'm Ken Aaron De Martin, an Information Technology student with a foundation
     in both network infrastructure and software development. Certified in CCNA
@@ -23,4 +15,39 @@
     Network Administrator or Junior Software Developer role building secure,
     scalable IT solutions.
   </p>
+
+  <div class="card about-education">
+    <h3>Education</h3>
+    <p>BS Information Technology — Mapúa Malayan Colleges Laguna (2022–Present), Dean's Lister</p>
+    <p>STEM, Information Technology — Far Eastern University Alabang (2020–2022), Graduated with Honors</p>
+  </div>
+
+  <h3 class="cert-title">Certifications</h3>
+  <div class="project-carousel">
+    <button type="button" class="carousel-btn prev" aria-label="Previous certifications">&#8249;</button>
+    <div class="project-viewport">
+      <div class="project-track">
+        {certs.map((c) => (
+          <article class="card project-card cert-card">
+            {c.featured && <span class="featured-badge">★ Featured</span>}
+            <span class="cert-issuer">{c.issuer}</span>
+            <h4>{c.name}</h4>
+            <div class="project-links">
+              <a class="btn btn-outline" href={c.url} target="_blank" rel="noreferrer">View credential</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+    <button type="button" class="carousel-btn next" aria-label="Next certifications">&#8250;</button>
+  </div>
 </section>
+
+<style is:global>
+  .about-education { margin-bottom: 2rem; }
+  .cert-title { font-size: 1.4rem; margin-bottom: 1.25rem; }
+  .cert-card { position: relative; flex-basis: 280px; }
+  .cert-card .cert-issuer { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase; }
+  .cert-card h4 { font-size: 1.05rem; margin: 0.35rem 0 0; }
+  @media (max-width: 600px) { .cert-card { flex-basis: 80vw; } }
+</style>
