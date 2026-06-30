@@ -4,8 +4,20 @@ const featured = projects.filter((p) => p.featured);
 const rest = projects.filter((p) => !p.featured);
 ---
 <section id="projects" class="projects reveal">
-  <p class="eyebrow">Browse my</p>
-  <h2>Projects</h2>
+  <div class="projects-head">
+    <div>
+      <p class="eyebrow">Browse my</p>
+      <h2>Projects</h2>
+    </div>
+    <button type="button" class="projects-grid-toggle" id="projects-grid-toggle" aria-label="View all projects">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+        <rect x="3" y="3" width="8" height="8" rx="1.5"></rect>
+        <rect x="13" y="3" width="8" height="8" rx="1.5"></rect>
+        <rect x="3" y="13" width="8" height="8" rx="1.5"></rect>
+        <rect x="13" y="13" width="8" height="8" rx="1.5"></rect>
+      </svg>
+    </button>
+  </div>
 
   {featured.length > 0 && (
     <div class="featured-row">
@@ -58,6 +70,16 @@ const rest = projects.filter((p) => !p.featured);
 </section>
 
 <style is:global>
+  .projects-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .projects-grid-toggle {
+    flex: none; margin-top: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 0.75rem;
+    background: var(--surface); color: var(--muted);
+    border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
+    cursor: pointer; transition: color 200ms ease, border-color 200ms ease;
+  }
+  .projects-grid-toggle:hover { color: var(--accent); border-color: var(--accent); }
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
 
