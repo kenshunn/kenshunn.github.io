@@ -58,8 +58,9 @@ import projects from '../data/projects.js';
 
   if (wrap && track && track.children.length > 0) {
     const EASE = 0.2;      // arrow glide stiffness
-    const FRICTION = 0.92; // drag-release momentum decay
-    const MAX_V = 34;      // speed cap (px/frame) for drag + fling
+    const FRICTION = 0.86; // drag-release momentum decay (lower = stops sooner)
+    const MAX_V = 16;      // speed cap (px/frame) for fling + wheel
+    const WHEEL_FACTOR = 0.5; // trackpad/wheel sensitivity
     let pos = 0;           // current translateX (px)
     let target = 0;        // arrow glide goal
     let vel = 0;           // momentum velocity (px/frame)
@@ -142,6 +143,21 @@ import projects from '../data/projects.js';
     track.addEventListener('pointermove', onMove);
     track.addEventListener('pointerup', onUp);
     track.addEventListener('pointercancel', onUp);
+
+    // --- Trackpad / wheel: horizontal two-finger scroll. Vertical intent is left
+    // to the page so normal scrolling still works.
+    const viewport = wrap.querySelector('.project-viewport');
+    (viewport || track).addEventListener('wheel', (e) => {
+      const horizontal = Math.abs(e.deltaX) >= Math.abs(e.deltaY);
+      if (!horizontal) return; // let the page scroll vertically
+      e.preventDefault();
+      mode = 'idle';
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      pos -= clamp(e.deltaX * WHEEL_FACTOR, MAX_V);
+      target = pos;
+      rebalance();
+      setX(pos);
+    }, { passive: false });
 
     // Swallow the click that follows a real drag so card links don't fire mid-swipe.
     track.addEventListener('click', (e) => {
