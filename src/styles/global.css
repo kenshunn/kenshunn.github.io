@@ -80,3 +80,6 @@ h2 { font-size: 2.25rem; margin-bottom: 2rem; }
   .hero-btns, .socials { justify-content: center; }
   .hero-pic { width: 220px; height: 220px; }
 }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+.bio { color: var(--muted); max-width: 720px; }
+@media (max-width: 600px) { .about-grid { grid-template-columns: 1fr; } }
