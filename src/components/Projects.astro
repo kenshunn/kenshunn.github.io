@@ -6,23 +6,25 @@ import projects from '../data/projects.js';
   <h2>Projects</h2>
   <div class="project-carousel">
     <button type="button" class="carousel-btn prev" aria-label="Previous projects">&#8249;</button>
-    <div class="project-grid">
-      {projects.map((p) => (
-        <article class="card project-card">
-          <img class="project-img" src={p.image} alt={p.title} />
-          <h3>{p.title}</h3>
-          <p class="project-desc">{p.description}</p>
-          <ul class="tags">
-            {p.tags.map((t) => <li>{t}</li>)}
-          </ul>
-          <div class="project-links">
-            <a class="btn btn-outline" href={p.repoUrl} target="_blank" rel="noreferrer">Code</a>
-            {p.liveUrl && (
-              <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
-            )}
-          </div>
-        </article>
-      ))}
+    <div class="project-viewport">
+      <div class="project-track">
+        {projects.map((p) => (
+          <article class="card project-card">
+            <img class="project-img" src={p.image} alt={p.title} />
+            <h3>{p.title}</h3>
+            <p class="project-desc">{p.description}</p>
+            <ul class="tags">
+              {p.tags.map((t) => <li>{t}</li>)}
+            </ul>
+            <div class="project-links">
+              <a class="btn btn-outline" href={p.repoUrl} target="_blank" rel="noreferrer">Code</a>
+              {p.liveUrl && (
+                <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
     <button type="button" class="carousel-btn next" aria-label="Next projects">&#8250;</button>
   </div>
@@ -37,7 +39,7 @@ import projects from '../data/projects.js';
     background: var(--surface); color: var(--text);
     border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
     font-size: 1.6rem; line-height: 1; cursor: pointer;
-    transition: all 200ms ease;
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
   }
   .carousel-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
   .carousel-btn.prev { left: -8px; }
@@ -50,65 +52,68 @@ import projects from '../data/projects.js';
 
 <script>
   const wrap = document.querySelector('.project-carousel');
-  const grid = wrap?.querySelector('.project-grid');
+  const track = wrap?.querySelector('.project-track');
 
-  if (wrap && grid && grid.children.length > 0) {
-    // Clone the full set before and after the originals -> [clones][originals][clones]
-    // so scrolling can wrap seamlessly in both directions (cylinder loop).
-    const originals = Array.from(grid.children);
-    const clone = (n) => {
-      const c = n.cloneNode(true);
-      c.setAttribute('aria-hidden', 'true');
-      c.classList.add('clone');
-      return c;
-    };
-    const head = document.createDocumentFragment();
-    const tail = document.createDocumentFragment();
-    originals.forEach((n) => head.appendChild(clone(n)));
-    originals.forEach((n) => tail.appendChild(clone(n)));
-    grid.appendChild(tail);
-    grid.insertBefore(head, grid.firstChild);
+  if (wrap && track && track.children.length > 0) {
+    const DURATION = 350; // ms, keep in sync with the inline transition below
+    let animating = false;
+    let queue = 0;
 
-    const n = originals.length;
-    // Width of one set, measured from element offsets so grid padding doesn't skew it.
-    const block = () => grid.children[n].offsetLeft - grid.children[0].offsetLeft;
-    const step = () => {
-      const gap = parseFloat(getComputedStyle(grid).columnGap || '24') || 24;
-      return grid.querySelector('.project-card').getBoundingClientRect().width + gap;
+    const stepWidth = () => {
+      const card = track.querySelector('.project-card');
+      const gap = parseFloat(getComputedStyle(track).columnGap || '24') || 24;
+      return card.getBoundingClientRect().width + gap;
     };
 
-    // Start on the real (middle) set.
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => { grid.scrollLeft = block(); })
-    );
-
-    // After scrolling settles, jump by one set if we've drifted into a clone set.
-    const normalize = () => {
-      const b = block();
-      if (b <= 0) return;
-      if (grid.scrollLeft >= b * 2) grid.scrollLeft -= b;
-      else if (grid.scrollLeft < b) grid.scrollLeft += b;
-    };
-    // Normalize free scrolling (drag / swipe / wheel) once it settles.
-    let t;
-    grid.addEventListener('scroll', () => {
-      clearTimeout(t);
-      t = setTimeout(normalize, 120);
-    });
-
-    // Arrow press: fold current position into the middle set first (instant and
-    // invisible, since every set is identical), guaranteeing infinite runway in
-    // both directions no matter how fast the user clicks. Then smooth-scroll one card.
-    const go = (dir) => {
-      const b = block();
-      if (b > 0) {
-        const sl = grid.scrollLeft;
-        grid.scrollLeft = (((sl - b) % b) + b) % b + b; // map into [b, 2b)
+    const move = (dir) => {
+      // dir = 1 (next) | -1 (prev)
+      if (dir > 0) {
+        // slide left by one card, then recycle the first card to the end.
+        track.style.transition = `transform ${DURATION}ms ease`;
+        track.style.transform = `translateX(${-stepWidth()}px)`;
+        const done = () => {
+          track.removeEventListener('transitionend', done);
+          track.style.transition = 'none';
+          track.appendChild(track.firstElementChild);
+          track.style.transform = 'translateX(0)';
+          track.getBoundingClientRect(); // force reflow
+          finish();
+        };
+        track.addEventListener('transitionend', done);
+      } else {
+        // pre-place last card at the front shifted off-screen, then slide to 0.
+        track.style.transition = 'none';
+        track.insertBefore(track.lastElementChild, track.firstElementChild);
+        track.style.transform = `translateX(${-stepWidth()}px)`;
+        track.getBoundingClientRect(); // force reflow
+        track.style.transition = `transform ${DURATION}ms ease`;
+        track.style.transform = 'translateX(0)';
+        const done = () => {
+          track.removeEventListener('transitionend', done);
+          finish();
+        };
+        track.addEventListener('transitionend', done);
       }
-      grid.scrollBy({ left: dir * step(), behavior: 'smooth' });
     };
 
-    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => go(-1));
-    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => go(1));
+    let lastDir = 1;
+    const finish = () => {
+      animating = false;
+      if (queue !== 0) {
+        const dir = queue > 0 ? 1 : -1;
+        queue -= dir;
+        trigger(dir);
+      }
+    };
+
+    const trigger = (dir) => {
+      if (animating) { queue += dir; return; }
+      animating = true;
+      lastDir = dir;
+      move(dir);
+    };
+
+    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => trigger(-1));
+    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => trigger(1));
   }
 </script>
