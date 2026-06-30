@@ -1,21 +1,42 @@
 const skills = [
   {
-    group: 'Frontend Development',
+    group: 'Networking & Infrastructure',
     items: [
-      { name: 'HTML', level: 'Newbie' },
-      { name: 'CSS', level: 'Basic' },
-      { name: 'JavaScript', level: 'Newbie' },
-      { name: 'C++', level: 'Basic' },
-      { name: 'C#', level: 'Basic' },
-      { name: 'Python', level: 'Basic' },
+      { name: 'CCNA', level: 'Certified' },
+      { name: 'RHEL / Linux CLI', level: 'Proficient' },
+      { name: 'TCP/IP', level: 'Proficient' },
+      { name: 'Routing & Switching', level: 'Proficient' },
+      { name: 'WiFi Restriction', level: 'Familiar' },
     ],
   },
   {
-    group: 'Backend Development',
+    group: 'Security & Systems',
     items: [
-      { name: 'Git', level: 'Newbie' },
-      { name: 'Node JS', level: 'Newbie' },
-      { name: 'SQL', level: 'Newbie' },
+      { name: 'Multi-Factor Auth (MFA)', level: 'Proficient' },
+      { name: 'Encryption / Decryption', level: 'Proficient' },
+      { name: 'JWT Authentication', level: 'Proficient' },
+    ],
+  },
+  {
+    group: 'Languages',
+    items: [
+      { name: 'Python', level: 'Proficient' },
+      { name: 'C++', level: 'Proficient' },
+      { name: 'C#', level: 'Proficient' },
+      { name: 'JavaScript', level: 'Proficient' },
+      { name: 'PHP', level: 'Familiar' },
+      { name: 'Kotlin', level: 'Familiar' },
+    ],
+  },
+  {
+    group: 'Web & Databases',
+    items: [
+      { name: 'MySQL / SQL', level: 'Proficient' },
+      { name: 'Node.js / ASP.NET', level: 'Proficient' },
+      { name: 'RESTful APIs', level: 'Proficient' },
+      { name: 'HTML / CSS', level: 'Proficient' },
+      { name: 'Oracle', level: 'Familiar' },
+      { name: 'Jetpack Compose', level: 'Familiar' },
     ],
   },
 ];
