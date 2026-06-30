@@ -36,7 +36,17 @@ const education = [
     ))}
   </div>
 
-  <h3 class="cert-title">Certifications</h3>
+  <div class="projects-head">
+    <h3 class="cert-title">Certifications</h3>
+    <button type="button" class="projects-grid-toggle" id="certs-grid-toggle" aria-label="View all certifications">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+        <rect x="3" y="3" width="8" height="8" rx="1.5"></rect>
+        <rect x="13" y="3" width="8" height="8" rx="1.5"></rect>
+        <rect x="3" y="13" width="8" height="8" rx="1.5"></rect>
+        <rect x="13" y="13" width="8" height="8" rx="1.5"></rect>
+      </svg>
+    </button>
+  </div>
 
   {featured.length > 0 && (
     <div class="featured-row">
