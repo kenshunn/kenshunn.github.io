@@ -44,7 +44,7 @@ const projects = [
     tags: ['ASP.NET', 'C#', 'SQL Server', 'JavaScript'],
     repoUrl: 'https://github.com/IanSalandanan/IT114L-MP-CareBy',
     liveUrl: '',
-    image: '/images/careby.svg',
+    image: 'https://raw.githubusercontent.com/IanSalandanan/IT114L-MP-CareBy/master/carebylogo.png',
   },
 ];
 
