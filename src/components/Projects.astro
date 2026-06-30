@@ -89,17 +89,26 @@ import projects from '../data/projects.js';
       if (grid.scrollLeft >= b * 2) grid.scrollLeft -= b;
       else if (grid.scrollLeft < b) grid.scrollLeft += b;
     };
+    // Normalize free scrolling (drag / swipe / wheel) once it settles.
     let t;
     grid.addEventListener('scroll', () => {
       clearTimeout(t);
       t = setTimeout(normalize, 120);
     });
 
-    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () =>
-      grid.scrollBy({ left: -step(), behavior: 'smooth' })
-    );
-    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () =>
-      grid.scrollBy({ left: step(), behavior: 'smooth' })
-    );
+    // Arrow press: fold current position into the middle set first (instant and
+    // invisible, since every set is identical), guaranteeing infinite runway in
+    // both directions no matter how fast the user clicks. Then smooth-scroll one card.
+    const go = (dir) => {
+      const b = block();
+      if (b > 0) {
+        const sl = grid.scrollLeft;
+        grid.scrollLeft = (((sl - b) % b) + b) % b + b; // map into [b, 2b)
+      }
+      grid.scrollBy({ left: dir * step(), behavior: 'smooth' });
+    };
+
+    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => go(-1));
+    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => go(1));
   }
 </script>
