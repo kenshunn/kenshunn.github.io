@@ -2,6 +2,11 @@
 import certifications from '../data/certifications.js';
 const featured = certifications.filter((c) => c.featured);
 const rest = certifications.filter((c) => !c.featured);
+
+const education = [
+  { school: 'Mapúa Malayan Colleges Laguna', degree: 'BS Information Technology', period: '2022 – Present', note: "Dean's Lister", logo: '/images/edu-cap.svg' },
+  { school: 'Far Eastern University Alabang', degree: 'STEM — Information Technology', period: '2020 – 2022', note: 'Graduated with Honors', logo: '/images/edu-cap.svg' },
+];
 ---
 <section id="about" class="about reveal">
   <p class="eyebrow">Get to know more</p>
@@ -17,10 +22,18 @@ const rest = certifications.filter((c) => !c.featured);
     scalable IT solutions.
   </p>
 
-  <div class="card about-education">
-    <h3>Education</h3>
-    <p>BS Information Technology — Mapúa Malayan Colleges Laguna (2022–Present), Dean's Lister</p>
-    <p>STEM, Information Technology — Far Eastern University Alabang (2020–2022), Graduated with Honors</p>
+  <h3 class="cert-title">Education</h3>
+  <div class="edu-grid">
+    {education.map((e) => (
+      <div class="card edu-card">
+        <img class="edu-logo" src={e.logo} alt={`${e.school} logo`} />
+        <div>
+          <h4>{e.school}</h4>
+          <p class="edu-degree">{e.degree}</p>
+          <p class="edu-meta">{e.period} · {e.note}</p>
+        </div>
+      </div>
+    ))}
   </div>
 
   <h3 class="cert-title">Certifications</h3>
@@ -64,8 +77,14 @@ const rest = certifications.filter((c) => !c.featured);
 </section>
 
 <style is:global>
-  .about-education { margin-bottom: 2rem; }
   .cert-title { font-size: 1.4rem; margin-bottom: 1.25rem; }
+  .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2.5rem; }
+  .edu-card { display: flex; gap: 1rem; align-items: center; }
+  .edu-logo { width: 48px; height: 48px; object-fit: contain; flex: none; }
+  .edu-card h4 { font-size: 1.05rem; }
+  .edu-degree { margin: 0.2rem 0 0; }
+  .edu-meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+  @media (max-width: 600px) { .edu-grid { grid-template-columns: 1fr; } }
   .cert-card { position: relative; flex-basis: 280px; }
   .cert-logo { width: 40px; height: 40px; object-fit: contain; margin-bottom: 0.75rem; }
   .cert-issuer { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase; }
