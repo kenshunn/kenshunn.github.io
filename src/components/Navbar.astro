@@ -1,0 +1,43 @@
+---
+const links = [
+  { href: '#about', label: 'About' },
+  { href: '#skills', label: 'Skills' },
+  { href: '#projects', label: 'Projects' },
+  { href: '#contact', label: 'Contact' },
+];
+---
+
+<nav class="navbar">
+  <a href="#top" class="logo">@kenshunn</a>
+
+  <ul class="nav-links desktop-only">
+    {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+  </ul>
+
+  <div class="nav-right">
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle color theme">Theme</button>
+    <button type="button" class="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <ul class="mobile-menu">
+    {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+  </ul>
+</nav>
+
+<script>
+  const burger = document.querySelector('.hamburger');
+  const menu = document.querySelector('.mobile-menu');
+  burger?.addEventListener('click', () => menu?.classList.toggle('open'));
+  menu?.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => menu.classList.remove('open'))
+  );
+
+  const toggle = document.getElementById('theme-toggle');
+  toggle?.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', cur);
+    try { localStorage.setItem('theme', cur); } catch (e) { /* ignore */ }
+  });
+</script>
