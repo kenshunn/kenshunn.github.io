@@ -220,12 +220,13 @@ const rest = projects.filter((p) => !p.featured);
     // to the page so normal scrolling still works.
     const viewport = wrap.querySelector('.project-viewport');
     (viewport || track).addEventListener('wheel', (e) => {
-      const horizontal = Math.abs(e.deltaX) >= Math.abs(e.deltaY);
-      if (!horizontal) return; // let the page scroll vertically
+      // use whichever axis dominates -> mouse wheel (deltaY) navigates too
+      const d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!d) return;
       e.preventDefault();
       mode = 'idle';
       if (raf) { cancelAnimationFrame(raf); raf = null; }
-      pos -= clamp(e.deltaX * WHEEL_FACTOR, MAX_V);
+      pos -= clamp(d * WHEEL_FACTOR, MAX_V);
       target = pos;
       rebalance();
       setX(pos);
