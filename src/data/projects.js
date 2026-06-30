@@ -1,13 +1,13 @@
 const projects = [
   {
-    // Featured slot — replace with your highlighted project. Set featured: true
-    // on whichever entry you want pinned/badged.
-    title: 'Featured Project',
-    description: 'Your highlighted project goes here. Replace this placeholder with the project you want to feature.',
-    tags: ['Featured'],
-    repoUrl: 'https://github.com/kenshunn',
+    // Featured slot — set featured: true on whichever entry you want pinned on top.
+    title: 'Financial Assistance Program (CEDO)',
+    description:
+      'A web-based voucher management system for an educational financial-assistance program for senior high school students. Admins and staff manage student records, generate PDF vouchers, run bulk imports, and keep audit logs. Built with CodeIgniter 4 (PHP 8.2+), MySQL, Bootstrap 5, and an async PDF worker.',
+    tags: ['PHP', 'CodeIgniter 4', 'MySQL', 'Bootstrap'],
+    repoUrl: 'https://github.com/jgtrea/FinancialAssistanceProgram_G2',
     liveUrl: '',
-    image: '/images/placeholder.png',
+    image: 'https://raw.githubusercontent.com/jgtrea/FinancialAssistanceProgram_G2/main/public/assets/img/city_education_office_seal.png',
     featured: true,
   },
   {
