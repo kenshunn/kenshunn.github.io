@@ -1,16 +1,42 @@
 ---
 import projects from '../data/projects.js';
+const featured = projects.filter((p) => p.featured);
+const rest = projects.filter((p) => !p.featured);
 ---
 <section id="projects" class="projects reveal">
   <p class="eyebrow">Browse my</p>
   <h2>Projects</h2>
+
+  {featured.length > 0 && (
+    <div class="featured-row">
+      {featured.map((p) => (
+        <article class="card featured-project">
+          <span class="featured-badge">★ Featured</span>
+          <img class="featured-img" src={p.image} alt={p.title} draggable="false" />
+          <div class="featured-body">
+            <h3>{p.title}</h3>
+            <p class="project-desc">{p.description}</p>
+            <ul class="tags">
+              {p.tags.map((t) => <li>{t}</li>)}
+            </ul>
+            <div class="project-links">
+              {p.liveUrl && (
+                <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
+              )}
+              <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+
   <div class="project-carousel">
     <button type="button" class="carousel-btn prev" aria-label="Previous projects">&#8249;</button>
     <div class="project-viewport">
       <div class="project-track">
-        {projects.map((p) => (
-          <article class={`card project-card${p.featured ? ' featured' : ''}`}>
-            {p.featured && <span class="featured-badge">★ Featured</span>}
+        {rest.map((p) => (
+          <article class="card project-card">
             <img class="project-img" src={p.image} alt={p.title} draggable="false" />
             <h3>{p.title}</h3>
             <p class="project-desc">{p.description}</p>
@@ -34,10 +60,24 @@ import projects from '../data/projects.js';
 <style>
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
-  .project-card.featured {
+
+  /* Featured project — static row above the carousel, not scrollable. */
+  .featured-row { margin-bottom: 2rem; }
+  .featured-project {
     position: relative;
+    display: flex; gap: 1.5rem; align-items: center;
     border-color: var(--accent);
     box-shadow: 0 0 0 1px var(--accent), 0 8px 30px -12px var(--accent);
+  }
+  .featured-img {
+    flex: 0 0 300px; width: 300px; height: 200px;
+    object-fit: cover; border-radius: 0.75rem; background: var(--bg);
+  }
+  .featured-body { display: flex; flex-direction: column; align-items: flex-start; }
+  .featured-body .project-links { margin-top: 1rem; }
+  @media (max-width: 700px) {
+    .featured-project { flex-direction: column; align-items: stretch; }
+    .featured-img { flex-basis: auto; width: 100%; }
   }
   .featured-badge {
     position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2;
