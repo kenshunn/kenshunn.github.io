@@ -1,0 +1,74 @@
+---
+import certifications from '../data/certifications.js';
+const certs = [...certifications].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+---
+<div class="ct-modal" id="certs-modal" role="dialog" aria-modal="true" aria-label="All certifications" hidden>
+  <div class="ct-backdrop" data-ct-close></div>
+  <div class="ct-box">
+    <div class="ct-head">
+      <h3>All Certifications</h3>
+      <button type="button" class="ct-close" aria-label="Close" data-ct-close>&times;</button>
+    </div>
+    <div class="ct-grid">
+      {certs.map((c) => (
+        <article class="ct-card">
+          {c.featured && <span class="featured-badge">★ Featured</span>}
+          <img class="ct-logo" src={c.logo} alt={`${c.issuer} logo`} />
+          <span class="cert-issuer">{c.issuer}</span>
+          <h4>{c.name}</h4>
+          <div class="ct-links">
+            <a class="btn btn-outline" href={c.url} target="_blank" rel="noreferrer">View credential</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .ct-modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .ct-modal[hidden] { display: none; }
+  .ct-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(2px); }
+  .ct-box {
+    position: relative; display: flex; flex-direction: column;
+    width: min(900px, 100%); max-height: 88vh;
+    background: var(--surface); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+    border-radius: 1rem; overflow: hidden;
+  }
+  .ct-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem; border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
+  }
+  .ct-close { background: none; border: none; color: var(--muted); font-size: 1.7rem; line-height: 1; cursor: pointer; }
+  .ct-close:hover { color: var(--text); }
+  .ct-grid {
+    overflow-y: auto; padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 97%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 3%, #000 97%, transparent 100%);
+  }
+  .ct-grid::-webkit-scrollbar { display: none; }
+  @media (max-width: 640px) { .ct-grid { grid-template-columns: 1fr; } }
+  .ct-card {
+    position: relative; display: flex; flex-direction: column;
+    background: var(--bg); border-radius: 0.85rem; padding: 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--muted) 25%, transparent);
+  }
+  .ct-logo { width: 42px; height: 42px; object-fit: contain; margin-bottom: 0.7rem; }
+  .ct-card h4 { font-size: 1rem; margin: 0.3rem 0 0; }
+  .ct-links { display: flex; margin-top: auto; padding-top: 0.9rem; justify-content: flex-end; }
+  .ct-links .btn { padding: 0.45rem 0.95rem; }
+</style>
+
+<script>
+  const modal = document.getElementById('certs-modal');
+  const toggle = document.getElementById('certs-grid-toggle');
+  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
+  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
+  toggle?.addEventListener('click', open);
+  modal?.querySelectorAll('[data-ct-close]').forEach((el) => el.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
+  });
+</script>
