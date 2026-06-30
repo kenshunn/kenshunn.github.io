@@ -185,18 +185,32 @@ const rest = projects.filter((p) => !p.featured);
     wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => nudge(-1));
 
     // --- Touch swipe only (mouse hold-drag removed; use arrows or trackpad instead).
+    // Wait for the first move to decide intent: horizontal -> drag the carousel;
+    // vertical -> ignore so the page scrolls normally (don't trap touch).
+    let downX = 0, downY = 0, decided = false;
     const onDown = (e) => {
       if (e.pointerType === 'mouse') return;
-      dragging = true; moved = 0; vel = 0; mode = 'idle';
-      startX = e.clientX; startPos = pos; lastX = e.clientX;
-      if (raf) { cancelAnimationFrame(raf); raf = null; }
-      track.setPointerCapture?.(e.pointerId);
+      decided = false; dragging = false; moved = 0; vel = 0;
+      downX = e.clientX; downY = e.clientY; startPos = pos; lastX = e.clientX;
     };
     const onMove = (e) => {
+      if (e.pointerType === 'mouse') return;
+      const dx = e.clientX - downX;
+      const dy = e.clientY - downY;
+      if (!decided) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; // not enough movement yet
+        decided = true;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          dragging = true; mode = 'idle';
+          if (raf) { cancelAnimationFrame(raf); raf = null; }
+          track.setPointerCapture?.(e.pointerId);
+        } else {
+          return; // vertical intent -> let the page scroll
+        }
+      }
       if (!dragging) return;
-      const dx = e.clientX - startX;
       moved = Math.max(moved, Math.abs(dx));
-      vel = clamp(e.clientX - lastX, MAX_V); // speed-limited follow
+      vel = clamp(e.clientX - lastX, MAX_V);
       lastX = e.clientX;
       pos = startPos + dx;
       target = pos;
@@ -204,10 +218,9 @@ const rest = projects.filter((p) => !p.featured);
       setX(pos);
     };
     const onUp = () => {
-      if (!dragging) return;
-      dragging = false;
-      track.classList.remove('grabbing');
-      vel = clamp(vel, MAX_V); // fling capped; rests wherever momentum decays — no forced snap
+      if (!dragging) { decided = false; return; }
+      dragging = false; decided = false;
+      vel = clamp(vel, MAX_V);
       mode = 'inertia';
       run();
     };
@@ -220,13 +233,12 @@ const rest = projects.filter((p) => !p.featured);
     // to the page so normal scrolling still works.
     const viewport = wrap.querySelector('.project-viewport');
     (viewport || track).addEventListener('wheel', (e) => {
-      // use whichever axis dominates -> mouse wheel (deltaY) navigates too
-      const d = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (!d) return;
+      const horizontal = Math.abs(e.deltaX) >= Math.abs(e.deltaY);
+      if (!horizontal) return; // vertical -> let the page scroll
       e.preventDefault();
       mode = 'idle';
       if (raf) { cancelAnimationFrame(raf); raf = null; }
-      pos -= clamp(d * WHEEL_FACTOR, MAX_V);
+      pos -= clamp(e.deltaX * WHEEL_FACTOR, MAX_V);
       target = pos;
       rebalance();
       setX(pos);
