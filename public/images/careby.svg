@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" role="img" aria-label="CareBy">
+  <rect width="400" height="220" fill="#0d1117"/>
+  <path d="M200 150 C150 112 150 68 182 68 C197 68 200 82 200 88 C200 82 203 68 218 68 C250 68 250 112 200 150 Z" fill="#f43f5e"/>
+  <path d="M196 92 h8 v9 h9 v8 h-9 v9 h-8 v-9 h-9 v-8 h9 z" fill="#ffffff"/>
+  <text x="200" y="190" fill="#e6edf3" font-family="system-ui, sans-serif" font-size="26" font-weight="700" text-anchor="middle">CareBy</text>
+</svg>

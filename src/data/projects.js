@@ -6,7 +6,7 @@ const projects = [
     tags: ['Kotlin', 'Jetpack Compose', 'BLE', 'MFA'],
     repoUrl: 'https://github.com/jgtrea/ClockIn-Application',
     liveUrl: '',
-    image: '/images/placeholder.png',
+    image: '/images/clockin.svg',
   },
   {
     title: "Rubik's Cube Cipher",
@@ -15,7 +15,7 @@ const projects = [
     tags: ['Python', 'Cryptography'],
     repoUrl: 'https://github.com/JannersLSR/Rubik-s-Cube-Cipher',
     liveUrl: '',
-    image: '/images/placeholder.png',
+    image: '/images/rubik.svg',
   },
   {
     title: 'Oasis (Twitter Clone)',
@@ -24,7 +24,16 @@ const projects = [
     tags: ['JavaScript', 'REST API', 'Auth'],
     repoUrl: 'https://github.com/IanSalandanan/TwitterClone',
     liveUrl: '',
-    image: '/images/placeholder.png',
+    image: '/images/oasis.svg',
+  },
+  {
+    title: 'CareBy',
+    description:
+      'An ASP.NET WebForms mental-health platform connecting patients with therapists for online counseling. Patients browse therapist profiles, book appointments, and join video consultations; therapists manage profiles and an appointment dashboard. Built on a three-tier architecture with SQL Server.',
+    tags: ['ASP.NET', 'C#', 'SQL Server', 'JavaScript'],
+    repoUrl: 'https://github.com/IanSalandanan/IT114L-MP-CareBy',
+    liveUrl: '',
+    image: '/images/careby.svg',
   },
 ];
 

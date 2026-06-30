@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" role="img" aria-label="Clock In">
+  <rect width="400" height="220" fill="#0d1117"/>
+  <g transform="translate(200,92)" fill="none" stroke="#6366f1" stroke-width="7" stroke-linecap="round">
+    <circle r="42"/>
+    <path d="M0 -42 v-10 M0 0 V-24 M0 0 L18 10"/>
+  </g>
+  <text x="200" y="178" fill="#e6edf3" font-family="system-ui, sans-serif" font-size="26" font-weight="700" text-anchor="middle">Clock In</text>
+</svg>
