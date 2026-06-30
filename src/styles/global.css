@@ -24,6 +24,22 @@ main > .coursework {
   scroll-snap-stop: always;
   min-height: 100vh;
 }
+
+/* Scroll-driven fade: each panel fades in entering, out leaving (previous disappears).
+   Progressive enhancement — only where view() timelines are supported. */
+@supports (animation-timeline: view()) {
+  main > section,
+  main > .coursework {
+    animation: panel-fade linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+  }
+  @keyframes panel-fade {
+    0% { opacity: 0; transform: scale(0.97); }
+    22%, 78% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: scale(0.97); }
+  }
+}
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   background: var(--bg);
