@@ -46,6 +46,15 @@ const projects = [
     liveUrl: '',
     image: 'https://raw.githubusercontent.com/IanSalandanan/IT114L-MP-CareBy/master/carebylogo.png',
   },
+  {
+    title: 'Electric Billing',
+    description:
+      'An electricity billing web application built on CodeIgniter 4 (PHP 8.2+). Handles customer and consumption records and bill generation through a clean MVC structure.',
+    tags: ['PHP', 'CodeIgniter 4', 'JavaScript'],
+    repoUrl: 'https://github.com/kenshunn/electric_billing',
+    liveUrl: '',
+    image: '/images/electric.svg',
+  },
 ];
 
 export default projects;
