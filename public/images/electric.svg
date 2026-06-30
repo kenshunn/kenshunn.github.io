@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" role="img" aria-label="Electric Billing">
+  <!-- receipt / bill -->
+  <path d="M150 40 h100 a6 6 0 0 1 6 6 v122 l-12 8 -12 -8 -12 8 -12 -8 -12 8 -12 -8 -12 8 -12 -8 -8 5 V46 a6 6 0 0 1 6 -6 Z" fill="#ECEFF4"/>
+  <!-- bill text lines -->
+  <g fill="#9AA4B2">
+    <rect x="162" y="58" width="76" height="6" rx="3"/>
+    <rect x="162" y="74" width="56" height="5" rx="2.5"/>
+    <rect x="162" y="120" width="76" height="5" rx="2.5"/>
+    <rect x="162" y="132" width="60" height="5" rx="2.5"/>
+  </g>
+  <!-- lightning bolt -->
+  <path d="M214 86 l-30 40 h18 l-8 34 34 -46 h-18 z" fill="#F59E0B" stroke="#EFE6CC" stroke-width="2" stroke-linejoin="round"/>
+</svg>
