@@ -1,0 +1,75 @@
+---
+---
+<div class="cv-modal" id="cv-modal" role="dialog" aria-modal="true" aria-label="Curriculum Vitae" hidden>
+  <div class="cv-modal-backdrop" data-cv-close></div>
+  <div class="cv-modal-box">
+    <div class="cv-modal-head">
+      <h3>Curriculum Vitae</h3>
+      <button type="button" class="cv-modal-close" aria-label="Close" data-cv-close>&times;</button>
+    </div>
+    <iframe class="cv-frame" src="/cv.pdf" title="Curriculum Vitae preview"></iframe>
+    <div class="cv-modal-foot">
+      <a class="btn btn-primary" href="/cv.pdf" download>Download PDF</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cv-modal {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .cv-modal[hidden] { display: none; }
+  .cv-modal-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(2px);
+  }
+  .cv-modal-box {
+    position: relative;
+    display: flex; flex-direction: column;
+    width: min(900px, 100%); height: min(85vh, 100%);
+    background: var(--surface); color: var(--text);
+    border-radius: 1rem; overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+  }
+  .cv-modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
+  }
+  .cv-modal-head h3 { color: var(--text); }
+  .cv-modal-close {
+    background: none; border: none; color: var(--muted);
+    font-size: 1.75rem; line-height: 1; cursor: pointer;
+  }
+  .cv-modal-close:hover { color: var(--text); }
+  .cv-frame { flex: 1; width: 100%; border: none; background: #fff; }
+  .cv-modal-foot {
+    padding: 1rem 1.25rem; text-align: center;
+    border-top: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
+  }
+</style>
+
+<script>
+  const modal = document.getElementById('cv-modal');
+  const opener = document.getElementById('cv-open');
+
+  function openModal() {
+    modal?.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal?.setAttribute('hidden', '');
+    document.body.style.overflow = '';
+  }
+
+  opener?.addEventListener('click', openModal);
+  modal?.querySelectorAll('[data-cv-close]').forEach((el) =>
+    el.addEventListener('click', closeModal)
+  );
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) closeModal();
+  });
+</script>
