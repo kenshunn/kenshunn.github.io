@@ -143,9 +143,11 @@ h2 { font-size: 2.25rem; margin-bottom: 2rem; }
   h2 { font-size: 1.8rem; margin-bottom: 1.25rem; }
   .project-card { flex-basis: 80vw; }
   .course-card { flex-basis: 78vw; }
-  .carousel-btn { width: 38px; height: 38px; font-size: 1.3rem; }
-  .carousel-btn.prev { left: 2px; }
-  .carousel-btn.next { right: 2px; }
+  /* move arrows to a centered row below the cards so they don't overlap content */
+  .project-carousel { padding-bottom: 3.75rem; }
+  .carousel-btn { width: 42px; height: 42px; font-size: 1.35rem; top: auto; bottom: 0; transform: none; }
+  .carousel-btn.prev { left: calc(50% - 50px); }
+  .carousel-btn.next { right: calc(50% - 50px); }
   .coursework { padding: 0 1.1rem; }
   .skills-groups { grid-template-columns: 1fr; }
 }

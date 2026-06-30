@@ -184,6 +184,15 @@ const rest = projects.filter((p) => !p.featured);
     wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => nudge(1));
     wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => nudge(-1));
 
+    // --- Auto-advance every 10s; pause on hover and when the tab is hidden.
+    let timer = null;
+    const startAuto = () => { if (!timer) timer = setInterval(() => nudge(1), 10000); };
+    const stopAuto = () => { if (timer) { clearInterval(timer); timer = null; } };
+    startAuto();
+    wrap.addEventListener('mouseenter', stopAuto);
+    wrap.addEventListener('mouseleave', startAuto);
+    document.addEventListener('visibilitychange', () => (document.hidden ? stopAuto() : startAuto()));
+
     // Navigation is arrow-only — swipe/drag/wheel scrolling is intentionally disabled.
   });
 </script>
