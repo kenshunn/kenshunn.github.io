@@ -147,7 +147,7 @@
       ctx.font = '13px ui-monospace, monospace';
     };
     const makeBottomStem = (x) => {
-      const len = rand(170, 360);
+      const len = rand(60, 150);
       return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.2, 0.45), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
     };
 
@@ -234,6 +234,8 @@
 
       // bottom garden — grows only while visible (bf>0); paused + persistent otherwise
       if (bf > 0) {
+        const fr = document.querySelector('.footer');
+        const baseY = fr ? fr.getBoundingClientRect().top : h;
         ctx.font = '13px ui-monospace, monospace';
         for (const b of bottomStems) {
           if (b.grown < b.len) b.grown += b.growSpeed;
@@ -241,7 +243,7 @@
             if (c.d > b.grown) break;
             const swayX = Math.sin(t * 0.6 + b.seed) * b.sway * (c.d / b.len);
             const x = b.x + swayX;
-            const y = h - 6 - c.d;
+            const y = baseY - 4 - c.d;
             if (Math.random() < 0.01) c.ch = randChar();
             const df = (0.35 + 0.45 * (1 - c.d / b.len)) * bf;
             ctx.fillStyle = rgba(STEM, df);
@@ -255,7 +257,7 @@
           }
           if (b.grown >= b.len) {
             const swayX = Math.sin(t * 0.6 + b.seed) * b.sway;
-            drawArt(b.x + swayX, h - 6 - b.len, b.type.art, b.type.color, bf);
+            drawArt(b.x + swayX, baseY - 4 - b.len, b.type.art, b.type.color, bf);
           }
         }
       }
