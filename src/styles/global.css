@@ -16,14 +16,13 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 
-/* Sticky stacking panels — each section pins, the next slides over it.
-   You don't see the previous panel until you scroll back up. */
+/* One full-viewport panel per section, snapped. */
+html { scroll-snap-type: y mandatory; }
 main > section,
 main > .coursework {
-  position: sticky;
-  top: 0;
   min-height: 100vh;
-  background: var(--bg);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
   justify-content: center;
