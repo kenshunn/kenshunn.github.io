@@ -329,7 +329,7 @@
         const bloomed = bottomStems.filter((s) => s.grown >= s.len);
         if (bees.length < 2 && Math.random() < 0.005 && bloomed.length) {
           const s = bloomed[Math.floor(Math.random() * bloomed.length)];
-          bees.push({ x: Math.random() < 0.5 ? -20 : w + 20, oy: rand(14, 42), tx: s.x, toy: rand(14, 42), hover: 0, leaving: false, wob: rand(0, TAU), visits: Math.floor(rand(2, 5)) });
+          bees.push({ x: Math.random() < 0.5 ? -20 : w + 20, oy: rand(70, 130), tx: s.x, toy: Math.max(45, s.len - rand(0, 22)), hover: 0, leaving: false, wob: rand(0, TAU), visits: Math.floor(rand(2, 5)) });
         }
         bees = bees.filter((be) => {
           be.wob += 0.08;
@@ -340,9 +340,9 @@
             be.hover = 0; be.visits--;
             if (be.visits > 0 && bloomed.length) {
               const s = bloomed[Math.floor(Math.random() * bloomed.length)];
-              be.tx = s.x; be.toy = rand(14, 42); // hop to another flower
+              be.tx = s.x; be.toy = Math.max(45, s.len - rand(0, 22)); // hop to another bloom head
             } else {
-              be.leaving = true; be.tx = be.x < w / 2 ? -40 : w + 40; be.toy = rand(16, 46);
+              be.leaving = true; be.tx = be.x < w / 2 ? -40 : w + 40; be.toy = rand(70, 130);
             }
           }
           return !(be.leaving && (be.x < -30 || be.x > w + 30));
