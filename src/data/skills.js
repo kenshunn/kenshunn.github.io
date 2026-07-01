@@ -16,6 +16,7 @@ const skills = [
   {
     group: 'Frameworks & Libraries',
     items: [
+      { name: 'Astro', level: 'Proficient', logo: 'astro', color: 'FF5D01', detail: 'Static-site framework — built this portfolio with Astro: component islands, zero-JS by default, and a GitHub Pages deploy.' },
       { name: 'Jetpack Compose', level: 'Proficient', logo: 'jetpackcompose', color: '4285F4', detail: 'Declarative Android UI for Clock In — screens, navigation, profile management, and real-time in-app notifications.' },
       { name: 'CodeIgniter', level: 'Proficient', logo: 'codeigniter', color: 'EF4223', detail: 'MVC PHP framework powering the Financial Assistance Program: student records, voucher generation, bulk imports, and audit logs.' },
       { name: 'ASP.NET', level: 'Familiar', logo: 'dotnet', color: '512BD4', detail: 'WebForms with a three-tier architecture for the CareBy platform.' },
@@ -39,6 +40,14 @@ const skills = [
       { name: 'Android', level: 'Proficient', logo: 'android', color: '34A853', detail: 'Native app development — BYOD device-to-account binding and BLE beacon integration.' },
       { name: 'REST APIs', level: 'Proficient', color: '005571', detail: 'Designing and consuming REST endpoints for client–server data flow.' },
       { name: 'ktlint', level: 'Familiar', color: 'F88909', detail: 'Kotlin linting and formatting to keep the Clock In codebase consistent.' },
+    ],
+  },
+  {
+    group: 'Design & Productivity',
+    items: [
+      { name: 'Canva', level: 'Proficient', color: '00C4CC', detail: 'Graphics, posters, and quick UI mockups.' },
+      { name: 'Microsoft Office', level: 'Proficient', color: 'D83B01', detail: 'Word, Excel, and PowerPoint for docs, data, and presentations.' },
+      { name: 'Adobe', level: 'Familiar', color: 'FF0000', detail: 'Photoshop / Adobe tools for image editing and assets.' },
     ],
   },
   {
