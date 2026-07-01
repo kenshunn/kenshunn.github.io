@@ -101,10 +101,11 @@
     const strandX = (s, d, t) => s.x + Math.sin(d * s.curlF + s.seed) * s.curl + Math.sin(t * 0.6 + s.seed) * s.sway * (d / s.len);
 
     // Big ASCII flower (rendered as a small glyph grid)
-    const FLOWER_ART = [' @@ ', '@@@@', '@@O@@', ' @@ '];
+    const FLOWER_ART = [' @ ', '@O@', ' @ '];
     const drawFlowerAscii = (cx, cy, color, alpha) => {
-      const cw = 8, chh = 12;
-      ctx.font = 'bold 15px ui-monospace, monospace';
+      if (alpha <= 0) return;
+      const cw = 6, chh = 9;
+      ctx.font = 'bold 11px ui-monospace, monospace';
       for (let r = 0; r < FLOWER_ART.length; r++) {
         const row = FLOWER_ART[r];
         for (let c = 0; c < row.length; c++) {
@@ -122,17 +123,21 @@
       const t = (performance.now() - t0) * 0.001;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
+      // fade the whole garland out as the hero scrolls away
+      const sf = Math.max(0, 1 - window.scrollY / (h * 0.85));
+      if (sf <= 0) { falling.length = 0; return; }
+
       // top wire
       ctx.beginPath(); ctx.moveTo(0, 8);
       for (let x = 0; x <= w; x += 20) ctx.lineTo(x, 8 + Math.sin(x * 0.01) * 6);
-      ctx.strokeStyle = rgba(STEM, 0.35); ctx.lineWidth = 1; ctx.stroke();
+      ctx.strokeStyle = rgba(STEM, 0.35 * sf); ctx.lineWidth = 1; ctx.stroke();
 
       // fairy-light glyphs
       ctx.font = '13px ui-monospace, monospace';
       for (const L of lights) {
         const y = 8 + Math.sin(L.x * 0.01) * 6;
         const tw = 0.5 + 0.5 * Math.sin(t * 2 + L.phase);
-        ctx.fillStyle = rgba(GLOW, 0.35 + 0.6 * tw);
+        ctx.fillStyle = rgba(GLOW, (0.35 + 0.6 * tw) * sf);
         ctx.fillText(L.ch, L.x, y);
       }
 
@@ -160,12 +165,12 @@
           const y = 8 + c.d;
           if (Math.random() < 0.01) c.ch = randChar();
           const depthFade = 0.35 + 0.5 * (1 - c.d / s.len);
-          ctx.fillStyle = rgba(STEM, depthFade * s.alpha);
+          ctx.fillStyle = rgba(STEM, depthFade * s.alpha * sf);
           ctx.fillText(c.ch, x, y);
         }
         // big ascii bloom while fully grown & holding (before it drops)
         if (s.tip && s.state === 'hold') {
-          drawFlowerAscii(strandX(s, s.len, t), 8 + s.len + STEPY, s.tip, 0.95 * s.alpha);
+          drawFlowerAscii(strandX(s, s.len, t), 8 + s.len + STEPY, s.tip, 0.95 * s.alpha * sf);
         }
       }
 
@@ -173,7 +178,7 @@
       falling = falling.filter((f) => {
         f.vy += 0.008; f.y += f.vy; f.wob += 0.05; f.x += Math.sin(f.wob) * 0.6; f.alpha -= 0.004;
         if (f.alpha <= 0 || f.y > h + 30) return false;
-        drawFlowerAscii(f.x, f.y, f.color, Math.max(0, f.alpha));
+        drawFlowerAscii(f.x, f.y, f.color, Math.max(0, f.alpha) * sf);
         return true;
       });
     };
