@@ -324,24 +324,25 @@
           }
         }
         // bees drifting toward random blooms
+        // bees use an offset above the footer line (oy) so they stay glued to the
+        // garden — scrolling/fading with it instead of following the viewport.
         const bloomed = bottomStems.filter((s) => s.grown >= s.len);
         if (bees.length < 2 && Math.random() < 0.005 && bloomed.length) {
           const s = bloomed[Math.floor(Math.random() * bloomed.length)];
-          bees.push({ x: Math.random() < 0.5 ? -20 : w + 20, y: baseY - rand(12, 40), tx: s.x, ty: baseY - rand(12, 40), hover: 0, leaving: false, wob: rand(0, TAU), visits: Math.floor(rand(2, 5)) });
+          bees.push({ x: Math.random() < 0.5 ? -20 : w + 20, oy: rand(14, 42), tx: s.x, toy: rand(14, 42), hover: 0, leaving: false, wob: rand(0, TAU), visits: Math.floor(rand(2, 5)) });
         }
         bees = bees.filter((be) => {
           be.wob += 0.08;
-          const dx = be.tx - be.x, dy = be.ty - be.y, dist = Math.hypot(dx, dy);
-          const vx = dx * 0.009, vy = dy * 0.009 + Math.sin(be.wob) * 0.3;
-          be.x += vx; be.y += vy;
-          drawBee(be.x, be.y, vx, bf);
+          const dx = be.tx - be.x, doy = be.toy - be.oy, dist = Math.hypot(dx, doy);
+          be.x += dx * 0.009; be.oy += doy * 0.009;
+          drawBee(be.x, baseY - be.oy + Math.sin(be.wob) * 3, dx, bf);
           if (!be.leaving && dist < 16 && ++be.hover > 80) {
             be.hover = 0; be.visits--;
             if (be.visits > 0 && bloomed.length) {
               const s = bloomed[Math.floor(Math.random() * bloomed.length)];
-              be.tx = s.x; be.ty = baseY - rand(12, 40); // hop to another flower, footer level
+              be.tx = s.x; be.toy = rand(14, 42); // hop to another flower
             } else {
-              be.leaving = true; be.tx = be.x < w / 2 ? -40 : w + 40; be.ty = baseY - rand(15, 45);
+              be.leaving = true; be.tx = be.x < w / 2 ? -40 : w + 40; be.toy = rand(16, 46);
             }
           }
           return !(be.leaving && (be.x < -30 || be.x > w + 30));
