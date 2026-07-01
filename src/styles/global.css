@@ -157,6 +157,7 @@ h2 { font-size: 2.25rem; margin-bottom: 2rem; }
 .form-error { color: #f87171; min-height: 1.2em; }
 .contact-fallback { display: flex; gap: 1.5rem; margin-top: 1.5rem; color: var(--muted); }
 .footer { text-align: center; padding: 2rem; color: var(--muted);
+  position: relative; background: var(--bg);
   border-top: 1px solid color-mix(in srgb, var(--muted) 20%, transparent); }
 .footer-links { display: flex; gap: 1.5rem; list-style: none; justify-content: center; margin-bottom: 1rem; }
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 600ms ease, transform 600ms ease; }
