@@ -74,46 +74,81 @@
       }
     };
 
-    /* ---------- Effect B: crawling vines + flowers (light) ---------- */
-    const STEM = [45, 106, 62];
+    /* ---------- Effect B: hanging vine garland + flowers + fairy lights (light) ---------- */
+    const STEM = [54, 110, 68], LEAF = [86, 148, 96], GLOW = [255, 214, 130];
     const FLOWERS = [[231, 84, 128], [239, 68, 68], [245, 158, 11], [168, 85, 247], [236, 72, 153], [250, 204, 21], [59, 130, 246]];
-    let vines = [];
-    const vineSpawn = (x, y, angle, depth) => ({
-      x: x ?? rand(0, w), y: y ?? (Math.random() < 0.5 ? -10 : h + 10),
-      angle: angle ?? rand(0, TAU), seed: rand(0, 1000),
-      curlAmp: rand(0.02, 0.06), curlFreq: rand(0.01, 0.03),
-      speed: rand(0.6, 1.1), len: 0, maxLen: rand(170, 360), thorn: 0, depth: depth || 0,
-    });
-    const vineInit = () => { ctx.clearRect(0, 0, w, h); vines = Array.from({ length: 8 }, () => vineSpawn()); };
-    const bloom = (x, y) => {
-      const col = FLOWERS[Math.floor(Math.random() * FLOWERS.length)];
-      const scale = rand(1, 1.5);
+    let strands = [], lights = [];
+    const t0 = performance.now();
+
+    const makeStrand = (x) => {
+      const len = rand(120, 340);
+      const leaves = [];
+      for (let d = 22; d < len - 8; d += rand(20, 34)) leaves.push({ d, side: Math.random() < 0.5 ? 1 : -1, size: rand(6, 11) });
+      return {
+        x, len, seed: rand(0, TAU), curl: rand(8, 20), curlF: rand(0.012, 0.022),
+        sway: rand(10, 22), leaves,
+        flower: Math.random() < 0.55 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null,
+      };
+    };
+    const gardenInit = () => {
+      strands = []; lights = [];
+      const gap = 150;
+      for (let x = 0; x <= w; x += gap) strands.push(makeStrand(x + rand(-25, 25)));
+      for (let k = 0; k < 5; k++) { strands.push(makeStrand(rand(0, 150))); strands.push(makeStrand(w - rand(0, 150))); }
+      for (let x = 40; x < w; x += rand(70, 120)) lights.push({ x, phase: rand(0, TAU) });
+    };
+
+    const drawLeaf = (x, y, ang, size) => {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+      ctx.beginPath(); ctx.ellipse(0, 0, size, size * 0.5, 0, 0, TAU);
+      ctx.fillStyle = rgba(LEAF, 0.85); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.strokeStyle = rgba(STEM, 0.5); ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.restore();
+    };
+    const drawFlower = (x, y, col) => {
       ctx.save(); ctx.translate(x, y);
-      for (let ring = 3; ring >= 1; ring--) {
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + ring, rr = 4.5 * ring * scale; ctx.moveTo(0, 0); ctx.arc(Math.cos(a) * rr * 0.4, Math.sin(a) * rr * 0.4, rr * 0.5, 0, TAU); }
-        ctx.fillStyle = rgba(col, 0.3 * ring / 3 + 0.14); ctx.fill();
+      for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; ctx.beginPath(); ctx.ellipse(Math.cos(a) * 5, Math.sin(a) * 5, 5, 3, a, 0, TAU); ctx.fillStyle = rgba(col, 0.9); ctx.fill(); }
+      ctx.beginPath(); ctx.arc(0, 0, 3, 0, TAU); ctx.fillStyle = rgba([250, 204, 21], 0.95); ctx.fill();
+      ctx.restore();
+    };
+
+    const gardenFrame = () => {
+      ctx.clearRect(0, 0, w, h);
+      const t = (performance.now() - t0) * 0.001;
+
+      // top wire + fairy lights
+      ctx.beginPath(); ctx.moveTo(0, 6);
+      for (let x = 0; x <= w; x += 20) ctx.lineTo(x, 6 + Math.sin(x * 0.01) * 6);
+      ctx.strokeStyle = rgba(STEM, 0.4); ctx.lineWidth = 1.2; ctx.stroke();
+      for (const L of lights) {
+        const y = 6 + Math.sin(L.x * 0.01) * 6 + 6;
+        const tw = 0.55 + 0.45 * Math.sin(t * 2 + L.phase);
+        const g = ctx.createRadialGradient(L.x, y, 0, L.x, y, 10);
+        g.addColorStop(0, rgba(GLOW, 0.9 * tw)); g.addColorStop(1, rgba(GLOW, 0));
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(L.x, y, 10, 0, TAU); ctx.fill();
+        ctx.fillStyle = rgba(GLOW, 0.9); ctx.beginPath(); ctx.arc(L.x, y, 1.8, 0, TAU); ctx.fill();
       }
-      ctx.beginPath(); ctx.arc(0, 0, 2.2 * scale, 0, TAU); ctx.fillStyle = rgba([250, 204, 21], 0.6); ctx.fill();
-      ctx.restore(); ctx.globalAlpha = 1;
-    };
-    const vineGrow = (v) => {
-      const px = v.x, py = v.y;
-      v.angle += Math.sin(v.len * v.curlFreq + v.seed) * v.curlAmp;
-      v.x += Math.cos(v.angle) * v.speed; v.y += Math.sin(v.angle) * v.speed; v.len += v.speed;
-      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(v.x, v.y);
-      ctx.strokeStyle = rgba(STEM, 0.85); ctx.lineWidth = Math.max(1, 2.4 - v.depth * 0.5); ctx.stroke();
-      v.thorn += v.speed;
-      if (v.thorn > 14) { v.thorn = 0; const na = v.angle + (Math.random() < 0.5 ? 1 : -1) * Math.PI / 2, tl = rand(4, 8); ctx.beginPath(); ctx.moveTo(v.x, v.y); ctx.lineTo(v.x + Math.cos(na) * tl, v.y + Math.sin(na) * tl); ctx.strokeStyle = rgba(STEM, 0.9); ctx.lineWidth = 1.4; ctx.stroke(); }
-      if (v.depth < 2 && vines.length < 12 && Math.random() < 0.009) vines.push(vineSpawn(v.x, v.y, v.angle + rand(-0.9, 0.9), v.depth + 1));
-      const off = v.x < -40 || v.x > w + 40 || v.y < -40 || v.y > h + 40;
-      if (v.len >= v.maxLen || off) { if (!off) bloom(v.x, v.y); return false; }
-      return true;
-    };
-    const vineFrame = () => {
-      ctx.fillStyle = rgba(BG, 0.055); ctx.fillRect(0, 0, w, h);
-      vines = vines.filter(vineGrow);
-      while (vines.length < 4) vines.push(vineSpawn());
+
+      // hanging strands
+      for (const s of strands) {
+        let px = s.x, py = 4;
+        ctx.beginPath(); ctx.moveTo(px, py);
+        for (let d = 0; d <= s.len; d += 6) {
+          const swayX = Math.sin(t * 0.6 + s.seed) * s.sway * (d / s.len);
+          const x = s.x + Math.sin(d * s.curlF + s.seed) * s.curl + swayX;
+          const y = 4 + d;
+          ctx.lineTo(x, y); px = x; py = y;
+        }
+        ctx.strokeStyle = rgba(STEM, 0.8); ctx.lineWidth = 2; ctx.stroke();
+
+        for (const lf of s.leaves) {
+          const swayX = Math.sin(t * 0.6 + s.seed) * s.sway * (lf.d / s.len);
+          const x = s.x + Math.sin(lf.d * s.curlF + s.seed) * s.curl + swayX;
+          const y = 4 + lf.d;
+          drawLeaf(x + lf.side * lf.size * 0.6, y, lf.side > 0 ? -0.5 : 0.5, lf.size);
+        }
+        if (s.flower) drawFlower(px, py, s.flower);
+      }
     };
 
     /* ---------- driver ---------- */
@@ -121,7 +156,7 @@
     const pick = () => {
       readColors();
       const light = document.documentElement.getAttribute('data-theme') === 'light';
-      active = light ? { init: vineInit, frame: vineFrame } : { init: conInit, frame: conFrame };
+      active = light ? { init: gardenInit, frame: gardenFrame } : { init: conInit, frame: conFrame };
       active.init();
     };
     const resize = () => {
