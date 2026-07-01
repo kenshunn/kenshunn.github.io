@@ -3,10 +3,7 @@
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
 <style is:global>
-  #bg-canvas {
-    position: fixed; inset: 0; width: 100%; height: 100%;
-    z-index: -1; pointer-events: none;
-  }
+  #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 </style>
 
 <script>
@@ -17,6 +14,8 @@
     const ctx = canvas.getContext('2d');
     let w = 0, h = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const TAU = Math.PI * 2;
+    const rand = (a, b) => a + Math.random() * (b - a);
 
     const css = (n, f) => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || f;
     const hexToRgb = (hex) => {
@@ -24,134 +23,117 @@
       const n = parseInt(m.length === 3 ? m.split('').map((c) => c + c).join('') : m, 16);
       return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
     };
-    let ACCENT = hexToRgb(css('--accent', '#6366f1'));
-    let MUTED = hexToRgb(css('--muted', '#8b949e'));
-    const acc = (a) => `rgba(${ACCENT[0]},${ACCENT[1]},${ACCENT[2]},${a})`;
-    const mut = (a) => `rgba(${MUTED[0]},${MUTED[1]},${MUTED[2]},${a})`;
+    let ACCENT = [99, 102, 241], MUTED = [139, 148, 158], BG = [13, 17, 23];
+    const readColors = () => {
+      ACCENT = hexToRgb(css('--accent', '#6366f1'));
+      MUTED = hexToRgb(css('--muted', '#8b949e'));
+      BG = hexToRgb(css('--bg', '#0d1117'));
+    };
+    const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 
-    const GRID = 42;          // dot-grid spacing
-    const LINK = 130;         // particle link distance
-    const MOUSE_R = 160;      // mouse influence radius
-    let particles = [];
     const mouse = { x: -9999, y: -9999 };
+    window.addEventListener('pointermove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('pointerleave', () => { mouse.x = -9999; mouse.y = -9999; });
 
-    const initParticles = () => {
+    /* ---------- Effect A: constellation + dot-grid + mouse (dark) ---------- */
+    const GRID = 42, LINK = 130, MOUSE_R = 160;
+    let particles = [];
+    const conInit = () => {
       const count = Math.min(90, Math.round((w * h) / 22000));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+        vx: rand(-0.35, 0.35), vy: rand(-0.35, 0.35),
       }));
     };
+    const conFrame = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (let x = GRID; x < w; x += GRID) for (let y = GRID; y < h; y += GRID) {
+        const d = Math.hypot(x - mouse.x, y - mouse.y);
+        if (d < MOUSE_R) { const t = 1 - d / MOUSE_R; ctx.beginPath(); ctx.arc(x, y, 1 + t * 1.6, 0, TAU); ctx.fillStyle = rgba(ACCENT, 0.15 + t * 0.5); ctx.fill(); }
+        else { ctx.beginPath(); ctx.arc(x, y, 1, 0, TAU); ctx.fillStyle = rgba(MUTED, 0.12); ctx.fill(); }
+      }
+      for (const p of particles) {
+        const dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.hypot(dx, dy);
+        if (d < MOUSE_R && d > 0.01) { const f = (1 - d / MOUSE_R) * 0.6; p.vx += dx / d * f; p.vy += dy / d * f; }
+        p.vx *= 0.98; p.vy *= 0.98;
+        if (Math.abs(p.vx) < 0.05) p.vx = rand(-0.3, 0.3);
+        if (Math.abs(p.vy) < 0.05) p.vy = rand(-0.3, 0.3);
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
+      }
+      for (let i = 0; i < particles.length; i++) {
+        const a = particles[i];
+        for (let j = i + 1; j < particles.length; j++) {
+          const b = particles[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+          if (d < LINK) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = rgba(ACCENT, 0.14 * (1 - d / LINK)); ctx.lineWidth = 1; ctx.stroke(); }
+        }
+        const md = Math.hypot(a.x - mouse.x, a.y - mouse.y);
+        if (md < MOUSE_R) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y); ctx.strokeStyle = rgba(ACCENT, 0.2 * (1 - md / MOUSE_R)); ctx.stroke(); }
+        ctx.beginPath(); ctx.arc(a.x, a.y, 1.6, 0, TAU); ctx.fillStyle = rgba(ACCENT, 0.5); ctx.fill();
+      }
+    };
 
+    /* ---------- Effect B: crawling vines + flowers (light) ---------- */
+    const STEM = [74, 124, 89], ROSE = [231, 84, 128];
+    let vines = [];
+    const vineSpawn = (x, y, angle, depth) => ({
+      x: x ?? rand(0, w), y: y ?? (Math.random() < 0.5 ? -10 : h + 10),
+      angle: angle ?? rand(0, TAU), seed: rand(0, 1000),
+      curlAmp: rand(0.02, 0.06), curlFreq: rand(0.01, 0.03),
+      speed: rand(0.5, 1.0), len: 0, maxLen: rand(260, 560), thorn: 0, depth: depth || 0,
+    });
+    const vineInit = () => { ctx.clearRect(0, 0, w, h); vines = Array.from({ length: 4 }, () => vineSpawn()); };
+    const bloom = (x, y) => {
+      ctx.save(); ctx.translate(x, y);
+      for (let ring = 3; ring >= 1; ring--) {
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) { const a = i / 5 * TAU + ring, rr = 3.5 * ring; ctx.moveTo(0, 0); ctx.arc(Math.cos(a) * rr * 0.4, Math.sin(a) * rr * 0.4, rr * 0.5, 0, TAU); }
+        ctx.fillStyle = rgba(ROSE, 0.16 * ring / 3 + 0.08); ctx.fill();
+      }
+      ctx.restore(); ctx.globalAlpha = 1;
+    };
+    const vineGrow = (v) => {
+      const px = v.x, py = v.y;
+      v.angle += Math.sin(v.len * v.curlFreq + v.seed) * v.curlAmp;
+      v.x += Math.cos(v.angle) * v.speed; v.y += Math.sin(v.angle) * v.speed; v.len += v.speed;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(v.x, v.y);
+      ctx.strokeStyle = rgba(STEM, 0.5); ctx.lineWidth = Math.max(0.6, 1.6 - v.depth * 0.4); ctx.stroke();
+      v.thorn += v.speed;
+      if (v.thorn > 16) { v.thorn = 0; const na = v.angle + (Math.random() < 0.5 ? 1 : -1) * Math.PI / 2, tl = rand(3, 6); ctx.beginPath(); ctx.moveTo(v.x, v.y); ctx.lineTo(v.x + Math.cos(na) * tl, v.y + Math.sin(na) * tl); ctx.strokeStyle = rgba(STEM, 0.55); ctx.stroke(); }
+      if (v.depth < 2 && vines.length < 9 && Math.random() < 0.006) vines.push(vineSpawn(v.x, v.y, v.angle + rand(-0.9, 0.9), v.depth + 1));
+      const off = v.x < -40 || v.x > w + 40 || v.y < -40 || v.y > h + 40;
+      if (v.len >= v.maxLen || off) { if (!off) bloom(v.x, v.y); return false; }
+      return true;
+    };
+    const vineFrame = () => {
+      ctx.fillStyle = rgba(BG, 0.04); ctx.fillRect(0, 0, w, h);
+      vines = vines.filter(vineGrow);
+      while (vines.length < 3) vines.push(vineSpawn());
+    };
+
+    /* ---------- driver ---------- */
+    let active = null, running = true;
+    const pick = () => {
+      readColors();
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      active = light ? { init: vineInit, frame: vineFrame } : { init: conInit, frame: conFrame };
+      active.init();
+    };
     const resize = () => {
       w = window.innerWidth; h = window.innerHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      initParticles();
+      pick();
     };
     window.addEventListener('resize', resize);
-    window.addEventListener('pointermove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
-    window.addEventListener('pointerleave', () => { mouse.x = -9999; mouse.y = -9999; });
-    window.addEventListener('theme-change', () => {
-      ACCENT = hexToRgb(css('--accent', '#6366f1'));
-      MUTED = hexToRgb(css('--muted', '#8b949e'));
-    });
+    new MutationObserver(pick).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     resize();
 
-    const drawGrid = () => {
-      for (let x = GRID; x < w; x += GRID) {
-        for (let y = GRID; y < h; y += GRID) {
-          const dx = x - mouse.x, dy = y - mouse.y;
-          const d = Math.hypot(dx, dy);
-          if (d < MOUSE_R) {
-            const t = 1 - d / MOUSE_R;
-            ctx.beginPath();
-            ctx.arc(x, y, 1 + t * 1.6, 0, Math.PI * 2);
-            ctx.fillStyle = acc(0.15 + t * 0.5);
-            ctx.fill();
-          } else {
-            ctx.beginPath();
-            ctx.arc(x, y, 1, 0, Math.PI * 2);
-            ctx.fillStyle = mut(0.12);
-            ctx.fill();
-          }
-        }
-      }
-    };
-
-    const step = () => {
-      for (const p of particles) {
-        // mouse repel
-        const dx = p.x - mouse.x, dy = p.y - mouse.y;
-        const d = Math.hypot(dx, dy);
-        if (d < MOUSE_R && d > 0.01) {
-          const f = (1 - d / MOUSE_R) * 0.6;
-          p.vx += (dx / d) * f;
-          p.vy += (dy / d) * f;
-        }
-        p.vx *= 0.98; p.vy *= 0.98;
-        // gentle floor speed so they keep drifting
-        p.x += p.vx || (p.vx = (Math.random() - 0.5) * 0.3);
-        p.y += p.vy;
-        // wrap
-        if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
-        if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
-      }
-    };
-
-    const drawParticles = () => {
-      // links between nearby particles
-      for (let i = 0; i < particles.length; i++) {
-        const a = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const d = Math.hypot(dx, dy);
-          if (d < LINK) {
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = acc(0.14 * (1 - d / LINK));
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-        // link to mouse
-        const mdx = a.x - mouse.x, mdy = a.y - mouse.y;
-        const md = Math.hypot(mdx, mdy);
-        if (md < MOUSE_R) {
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = acc(0.2 * (1 - md / MOUSE_R));
-          ctx.stroke();
-        }
-        // dot
-        ctx.beginPath();
-        ctx.arc(a.x, a.y, 1.6, 0, Math.PI * 2);
-        ctx.fillStyle = acc(0.5);
-        ctx.fill();
-      }
-    };
-
-    let running = true;
-    const frame = () => {
-      if (!running) return;
-      ctx.clearRect(0, 0, w, h);
-      drawGrid();
-      step();
-      drawParticles();
-      requestAnimationFrame(frame);
-    };
-
-    if (reduce) {
-      ctx.clearRect(0, 0, w, h);
-      drawGrid();
-      drawParticles();
-    } else {
-      document.addEventListener('visibilitychange', () => {
-        const was = running;
-        running = !document.hidden;
-        if (running && !was) frame();
-      });
+    const frame = () => { if (!running) return; active.frame(); requestAnimationFrame(frame); };
+    if (reduce) { for (let s = 0; s < 300; s++) active.frame(); }
+    else {
+      document.addEventListener('visibilitychange', () => { const was = running; running = !document.hidden; if (running && !was) frame(); });
       frame();
     }
   }
