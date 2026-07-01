@@ -75,7 +75,8 @@
     const randChar = () => CHARSET[Math.floor(Math.random() * CHARSET.length)];
     const fillChars = (len) => {
       const chars = [];
-      for (let d = STEPY; d < len; d += STEPY) chars.push({ d, ch: randChar() });
+      let i = 0;
+      for (let d = STEPY; d < len; d += STEPY) { chars.push({ d, ch: randChar(), leaf: i % 3 === 1 ? (i % 6 === 1 ? 1 : -1) : 0 }); i++; }
       return chars;
     };
     const makeStrand = (x) => {
@@ -146,8 +147,8 @@
       ctx.font = '13px ui-monospace, monospace';
     };
     const makeBottomStem = (x) => {
-      const len = rand(70, 200);
-      return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.15, 0.4), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
+      const len = rand(170, 360);
+      return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.2, 0.45), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
     };
 
     const gardenFrame = () => {
@@ -209,6 +210,7 @@
           const depthFade = 0.35 + 0.5 * (1 - c.d / s.len);
           ctx.fillStyle = rgba(STEM, depthFade * s.alpha * sf);
           ctx.fillText(c.ch, x, y);
+          if (c.leaf) { ctx.fillStyle = rgba(LEAF, depthFade * s.alpha * sf); ctx.fillText(c.leaf < 0 ? '<' : '>', x + c.leaf * 9, y); }
         }
         // big ascii bloom while fully grown & holding (before it drops)
         if (s.tip && s.state === 'hold') {
@@ -236,8 +238,10 @@
             const x = b.x + swayX;
             const y = h - 6 - c.d;
             if (Math.random() < 0.01) c.ch = randChar();
-            ctx.fillStyle = rgba(STEM, (0.35 + 0.45 * (1 - c.d / b.len)) * bf);
+            const df = (0.35 + 0.45 * (1 - c.d / b.len)) * bf;
+            ctx.fillStyle = rgba(STEM, df);
             ctx.fillText(c.ch, x, y);
+            if (c.leaf) { ctx.fillStyle = rgba(LEAF, df); ctx.fillText(c.leaf < 0 ? '<' : '>', x + c.leaf * 9, y); }
           }
           if (b.grown >= b.len) {
             const swayX = Math.sin(t * 0.6 + b.seed) * b.sway;
