@@ -16,7 +16,7 @@ const skills = [
   {
     group: 'Frameworks & Libraries',
     items: [
-      { name: 'Astro', level: 'Proficient', logo: 'astro', color: 'FF5D01', detail: 'Static-site framework — built this portfolio with Astro: component islands, zero-JS by default, and a GitHub Pages deploy.' },
+      { name: 'Astro', level: 'Proficient', pct: 82, logo: 'astro', color: 'FF5D01', detail: 'Static-site framework — built this portfolio with Astro: component islands, zero-JS by default, and a GitHub Pages deploy.' },
       { name: 'Jetpack Compose', level: 'Proficient', logo: 'jetpackcompose', color: '4285F4', detail: 'Declarative Android UI for Clock In — screens, navigation, profile management, and real-time in-app notifications.' },
       { name: 'CodeIgniter', level: 'Proficient', logo: 'codeigniter', color: 'EF4223', detail: 'MVC PHP framework powering the Financial Assistance Program: student records, voucher generation, bulk imports, and audit logs.' },
       { name: 'ASP.NET', level: 'Familiar', logo: 'dotnet', color: '512BD4', detail: 'WebForms with a three-tier architecture for the CareBy platform.' },
@@ -45,9 +45,9 @@ const skills = [
   {
     group: 'Design & Productivity',
     items: [
-      { name: 'Canva', level: 'Proficient', color: '00C4CC', detail: 'Graphics, posters, and quick UI mockups.' },
-      { name: 'Microsoft Office', level: 'Proficient', color: 'D83B01', detail: 'Word, Excel, and PowerPoint for docs, data, and presentations.' },
-      { name: 'Adobe', level: 'Familiar', color: 'FF0000', detail: 'Photoshop / Adobe tools for image editing and assets.' },
+      { name: 'Canva', level: 'Proficient', pct: 80, color: '00C4CC', logoUrl: 'https://www.vectorlogo.zone/logos/canva/canva-icon.svg', detail: 'Graphics, posters, and quick UI mockups.' },
+      { name: 'Microsoft Office', level: 'Proficient', pct: 90, color: 'D83B01', logoUrl: 'https://www.vectorlogo.zone/logos/microsoft/microsoft-icon.svg', detail: 'Word, Excel, and PowerPoint for docs, data, and presentations.' },
+      { name: 'Adobe', level: 'Familiar', pct: 66, color: 'FF0000', logoUrl: 'https://www.vectorlogo.zone/logos/adobe/adobe-icon.svg', detail: 'Photoshop / Adobe tools for image editing and assets.' },
     ],
   },
   {
