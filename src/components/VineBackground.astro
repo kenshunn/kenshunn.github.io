@@ -35,29 +35,34 @@
     window.addEventListener('pointermove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
     window.addEventListener('pointerleave', () => { mouse.x = -9999; mouse.y = -9999; });
 
-    /* ---------- Effect A: constellation + dot-grid + mouse (dark) ---------- */
-    const GRID = 42, LINK = 130, MOUSE_R = 160;
-    let particles = [];
+    /* ---------- Effect A: constellation + starfield (dark) ---------- */
+    const LINK = 130;
+    let particles = [], stars = [];
     const conInit = () => {
       const count = Math.min(90, Math.round((w * h) / 22000));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w, y: Math.random() * h,
-        vx: rand(-0.35, 0.35), vy: rand(-0.35, 0.35),
+        vx: rand(-0.3, 0.3), vy: rand(-0.3, 0.3),
       }));
+      const sc = Math.min(260, Math.round((w * h) / 6000));
+      stars = Array.from({ length: sc }, () => {
+        const z = Math.random();
+        return { x: Math.random() * w, y: Math.random() * h, z, tw: rand(0, TAU) };
+      });
     };
     const conFrame = () => {
       ctx.clearRect(0, 0, w, h);
-      for (let x = GRID; x < w; x += GRID) for (let y = GRID; y < h; y += GRID) {
-        const d = Math.hypot(x - mouse.x, y - mouse.y);
-        if (d < MOUSE_R) { const t = 1 - d / MOUSE_R; ctx.beginPath(); ctx.arc(x, y, 1 + t * 1.6, 0, TAU); ctx.fillStyle = rgba(ACCENT, 0.15 + t * 0.5); ctx.fill(); }
-        else { ctx.beginPath(); ctx.arc(x, y, 1, 0, TAU); ctx.fillStyle = rgba(MUTED, 0.12); ctx.fill(); }
+      const t = performance.now() * 0.001;
+      // starfield — parallax drift + twinkle
+      for (const s of stars) {
+        s.y += 0.05 + s.z * 0.35;
+        if (s.y > h + 2) { s.y = -2; s.x = Math.random() * w; }
+        const a = (0.25 + s.z * 0.5) * (0.6 + 0.4 * Math.sin(t * 1.5 + s.tw));
+        ctx.beginPath(); ctx.arc(s.x, s.y, 0.5 + s.z * 1.3, 0, TAU);
+        ctx.fillStyle = rgba(MUTED, a); ctx.fill();
       }
+      // constellation
       for (const p of particles) {
-        const dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.hypot(dx, dy);
-        if (d < MOUSE_R && d > 0.01) { const f = (1 - d / MOUSE_R) * 0.6; p.vx += dx / d * f; p.vy += dy / d * f; }
-        p.vx *= 0.98; p.vy *= 0.98;
-        if (Math.abs(p.vx) < 0.05) p.vx = rand(-0.3, 0.3);
-        if (Math.abs(p.vy) < 0.05) p.vy = rand(-0.3, 0.3);
         p.x += p.vx; p.y += p.vy;
         if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
         if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
@@ -68,8 +73,6 @@
           const b = particles[j], d = Math.hypot(a.x - b.x, a.y - b.y);
           if (d < LINK) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = rgba(ACCENT, 0.14 * (1 - d / LINK)); ctx.lineWidth = 1; ctx.stroke(); }
         }
-        const md = Math.hypot(a.x - mouse.x, a.y - mouse.y);
-        if (md < MOUSE_R) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y); ctx.strokeStyle = rgba(ACCENT, 0.2 * (1 - md / MOUSE_R)); ctx.stroke(); }
         ctx.beginPath(); ctx.arc(a.x, a.y, 1.6, 0, TAU); ctx.fillStyle = rgba(ACCENT, 0.5); ctx.fill();
       }
     };
@@ -80,74 +83,65 @@
     let strands = [], lights = [];
     const t0 = performance.now();
 
+    const CHARSET = '01{}[]()<>/\\;:*#+=$%&|!?~^'.split('');
+    const STEPY = 16; // vertical char spacing
     const makeStrand = (x) => {
-      const len = rand(120, 340);
-      const leaves = [];
-      for (let d = 22; d < len - 8; d += rand(20, 34)) leaves.push({ d, side: Math.random() < 0.5 ? 1 : -1, size: rand(6, 11) });
+      const len = rand(140, 380);
+      const chars = [];
+      for (let d = STEPY; d < len; d += STEPY) chars.push({ d, ch: CHARSET[Math.floor(Math.random() * CHARSET.length)], flip: rand(0, 1) });
       return {
-        x, len, seed: rand(0, TAU), curl: rand(8, 20), curlF: rand(0.012, 0.022),
-        sway: rand(10, 22), leaves,
-        flower: Math.random() < 0.55 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null,
+        x, len, seed: rand(0, TAU), curl: rand(8, 20), curlF: rand(0.012, 0.022), sway: rand(10, 22), chars,
+        tip: Math.random() < 0.6 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null,
       };
     };
     const gardenInit = () => {
       strands = []; lights = [];
-      const gap = 150;
+      const gap = 130;
       for (let x = 0; x <= w; x += gap) strands.push(makeStrand(x + rand(-25, 25)));
       for (let k = 0; k < 5; k++) { strands.push(makeStrand(rand(0, 150))); strands.push(makeStrand(w - rand(0, 150))); }
-      for (let x = 40; x < w; x += rand(70, 120)) lights.push({ x, phase: rand(0, TAU) });
-    };
-
-    const drawLeaf = (x, y, ang, size) => {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
-      ctx.beginPath(); ctx.ellipse(0, 0, size, size * 0.5, 0, 0, TAU);
-      ctx.fillStyle = rgba(LEAF, 0.85); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0); ctx.strokeStyle = rgba(STEM, 0.5); ctx.lineWidth = 0.8; ctx.stroke();
-      ctx.restore();
-    };
-    const drawFlower = (x, y, col) => {
-      ctx.save(); ctx.translate(x, y);
-      for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; ctx.beginPath(); ctx.ellipse(Math.cos(a) * 5, Math.sin(a) * 5, 5, 3, a, 0, TAU); ctx.fillStyle = rgba(col, 0.9); ctx.fill(); }
-      ctx.beginPath(); ctx.arc(0, 0, 3, 0, TAU); ctx.fillStyle = rgba([250, 204, 21], 0.95); ctx.fill();
-      ctx.restore();
+      for (let x = 40; x < w; x += rand(60, 100)) lights.push({ x, phase: rand(0, TAU), ch: CHARSET[Math.floor(Math.random() * CHARSET.length)] });
     };
 
     const gardenFrame = () => {
       ctx.clearRect(0, 0, w, h);
       const t = (performance.now() - t0) * 0.001;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-      // top wire + fairy lights
-      ctx.beginPath(); ctx.moveTo(0, 6);
-      for (let x = 0; x <= w; x += 20) ctx.lineTo(x, 6 + Math.sin(x * 0.01) * 6);
-      ctx.strokeStyle = rgba(STEM, 0.4); ctx.lineWidth = 1.2; ctx.stroke();
+      // top wire
+      ctx.beginPath(); ctx.moveTo(0, 8);
+      for (let x = 0; x <= w; x += 20) ctx.lineTo(x, 8 + Math.sin(x * 0.01) * 6);
+      ctx.strokeStyle = rgba(STEM, 0.35); ctx.lineWidth = 1; ctx.stroke();
+
+      // fairy-light glyphs on the wire
+      ctx.font = '13px ui-monospace, monospace';
       for (const L of lights) {
-        const y = 6 + Math.sin(L.x * 0.01) * 6 + 6;
-        const tw = 0.55 + 0.45 * Math.sin(t * 2 + L.phase);
-        const g = ctx.createRadialGradient(L.x, y, 0, L.x, y, 10);
-        g.addColorStop(0, rgba(GLOW, 0.9 * tw)); g.addColorStop(1, rgba(GLOW, 0));
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(L.x, y, 10, 0, TAU); ctx.fill();
-        ctx.fillStyle = rgba(GLOW, 0.9); ctx.beginPath(); ctx.arc(L.x, y, 1.8, 0, TAU); ctx.fill();
+        const y = 8 + Math.sin(L.x * 0.01) * 6;
+        const tw = 0.5 + 0.5 * Math.sin(t * 2 + L.phase);
+        ctx.fillStyle = rgba(GLOW, 0.35 + 0.6 * tw);
+        ctx.fillText(L.ch, L.x, y);
       }
 
-      // hanging strands
+      // hanging strands of ascii
+      ctx.font = '13px ui-monospace, monospace';
       for (const s of strands) {
-        let px = s.x, py = 4;
-        ctx.beginPath(); ctx.moveTo(px, py);
-        for (let d = 0; d <= s.len; d += 6) {
-          const swayX = Math.sin(t * 0.6 + s.seed) * s.sway * (d / s.len);
-          const x = s.x + Math.sin(d * s.curlF + s.seed) * s.curl + swayX;
-          const y = 4 + d;
-          ctx.lineTo(x, y); px = x; py = y;
+        let lastX = s.x, lastY = 8;
+        for (const c of s.chars) {
+          const swayX = Math.sin(t * 0.6 + s.seed) * s.sway * (c.d / s.len);
+          const x = s.x + Math.sin(c.d * s.curlF + s.seed) * s.curl + swayX;
+          const y = 8 + c.d;
+          const fade = 0.35 + 0.5 * (1 - c.d / s.len);
+          // occasional flicker to a new glyph
+          if (Math.random() < 0.01) c.ch = CHARSET[Math.floor(Math.random() * CHARSET.length)];
+          ctx.fillStyle = rgba(STEM, fade);
+          ctx.fillText(c.ch, x, y);
+          lastX = x; lastY = y;
         }
-        ctx.strokeStyle = rgba(STEM, 0.8); ctx.lineWidth = 2; ctx.stroke();
-
-        for (const lf of s.leaves) {
-          const swayX = Math.sin(t * 0.6 + s.seed) * s.sway * (lf.d / s.len);
-          const x = s.x + Math.sin(lf.d * s.curlF + s.seed) * s.curl + swayX;
-          const y = 4 + lf.d;
-          drawLeaf(x + lf.side * lf.size * 0.6, y, lf.side > 0 ? -0.5 : 0.5, lf.size);
+        if (s.tip) {
+          ctx.font = 'bold 15px ui-monospace, monospace';
+          ctx.fillStyle = rgba(s.tip, 0.95);
+          ctx.fillText('❀', lastX, lastY + STEPY);
+          ctx.font = '13px ui-monospace, monospace';
         }
-        if (s.flower) drawFlower(px, py, s.flower);
       }
     };
 
