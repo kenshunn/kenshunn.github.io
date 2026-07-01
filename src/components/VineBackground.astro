@@ -75,7 +75,8 @@
     };
 
     /* ---------- Effect B: crawling vines + flowers (light) ---------- */
-    const STEM = [74, 124, 89], ROSE = [231, 84, 128];
+    const STEM = [45, 106, 62];
+    const FLOWERS = [[231, 84, 128], [239, 68, 68], [245, 158, 11], [168, 85, 247], [236, 72, 153], [250, 204, 21], [59, 130, 246]];
     let vines = [];
     const vineSpawn = (x, y, angle, depth) => ({
       x: x ?? rand(0, w), y: y ?? (Math.random() < 0.5 ? -10 : h + 10),
@@ -83,14 +84,17 @@
       curlAmp: rand(0.02, 0.06), curlFreq: rand(0.01, 0.03),
       speed: rand(0.5, 1.0), len: 0, maxLen: rand(260, 560), thorn: 0, depth: depth || 0,
     });
-    const vineInit = () => { ctx.clearRect(0, 0, w, h); vines = Array.from({ length: 4 }, () => vineSpawn()); };
+    const vineInit = () => { ctx.clearRect(0, 0, w, h); vines = Array.from({ length: 8 }, () => vineSpawn()); };
     const bloom = (x, y) => {
+      const col = FLOWERS[Math.floor(Math.random() * FLOWERS.length)];
+      const scale = rand(1, 1.5);
       ctx.save(); ctx.translate(x, y);
       for (let ring = 3; ring >= 1; ring--) {
         ctx.beginPath();
-        for (let i = 0; i < 5; i++) { const a = i / 5 * TAU + ring, rr = 3.5 * ring; ctx.moveTo(0, 0); ctx.arc(Math.cos(a) * rr * 0.4, Math.sin(a) * rr * 0.4, rr * 0.5, 0, TAU); }
-        ctx.fillStyle = rgba(ROSE, 0.16 * ring / 3 + 0.08); ctx.fill();
+        for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + ring, rr = 4.5 * ring * scale; ctx.moveTo(0, 0); ctx.arc(Math.cos(a) * rr * 0.4, Math.sin(a) * rr * 0.4, rr * 0.5, 0, TAU); }
+        ctx.fillStyle = rgba(col, 0.3 * ring / 3 + 0.14); ctx.fill();
       }
+      ctx.beginPath(); ctx.arc(0, 0, 2.2 * scale, 0, TAU); ctx.fillStyle = rgba([250, 204, 21], 0.6); ctx.fill();
       ctx.restore(); ctx.globalAlpha = 1;
     };
     const vineGrow = (v) => {
@@ -98,18 +102,18 @@
       v.angle += Math.sin(v.len * v.curlFreq + v.seed) * v.curlAmp;
       v.x += Math.cos(v.angle) * v.speed; v.y += Math.sin(v.angle) * v.speed; v.len += v.speed;
       ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(v.x, v.y);
-      ctx.strokeStyle = rgba(STEM, 0.5); ctx.lineWidth = Math.max(0.6, 1.6 - v.depth * 0.4); ctx.stroke();
+      ctx.strokeStyle = rgba(STEM, 0.85); ctx.lineWidth = Math.max(1, 2.4 - v.depth * 0.5); ctx.stroke();
       v.thorn += v.speed;
-      if (v.thorn > 16) { v.thorn = 0; const na = v.angle + (Math.random() < 0.5 ? 1 : -1) * Math.PI / 2, tl = rand(3, 6); ctx.beginPath(); ctx.moveTo(v.x, v.y); ctx.lineTo(v.x + Math.cos(na) * tl, v.y + Math.sin(na) * tl); ctx.strokeStyle = rgba(STEM, 0.55); ctx.stroke(); }
-      if (v.depth < 2 && vines.length < 9 && Math.random() < 0.006) vines.push(vineSpawn(v.x, v.y, v.angle + rand(-0.9, 0.9), v.depth + 1));
+      if (v.thorn > 14) { v.thorn = 0; const na = v.angle + (Math.random() < 0.5 ? 1 : -1) * Math.PI / 2, tl = rand(4, 8); ctx.beginPath(); ctx.moveTo(v.x, v.y); ctx.lineTo(v.x + Math.cos(na) * tl, v.y + Math.sin(na) * tl); ctx.strokeStyle = rgba(STEM, 0.9); ctx.lineWidth = 1.4; ctx.stroke(); }
+      if (v.depth < 3 && vines.length < 18 && Math.random() < 0.014) vines.push(vineSpawn(v.x, v.y, v.angle + rand(-0.9, 0.9), v.depth + 1));
       const off = v.x < -40 || v.x > w + 40 || v.y < -40 || v.y > h + 40;
       if (v.len >= v.maxLen || off) { if (!off) bloom(v.x, v.y); return false; }
       return true;
     };
     const vineFrame = () => {
-      ctx.fillStyle = rgba(BG, 0.04); ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = rgba(BG, 0.018); ctx.fillRect(0, 0, w, h);
       vines = vines.filter(vineGrow);
-      while (vines.length < 3) vines.push(vineSpawn());
+      while (vines.length < 6) vines.push(vineSpawn());
     };
 
     /* ---------- driver ---------- */
