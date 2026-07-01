@@ -147,7 +147,7 @@
     };
     const makeBottomStem = (x) => {
       const len = rand(70, 200);
-      return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.35, 0.8), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
+      return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.15, 0.4), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
     };
 
     const gardenFrame = () => {
