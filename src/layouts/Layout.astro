@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import VineBackground from '../components/VineBackground.astro';
 const { title = 'Ken Aaron De Martin — Portfolio' } = Astro.props;
 ---
 
@@ -26,6 +27,7 @@ const { title = 'Ken Aaron De Martin — Portfolio' } = Astro.props;
     </noscript>
   </head>
   <body>
+    <VineBackground />
     <slot />
     <script>
       import '../scripts/reveal.js';
