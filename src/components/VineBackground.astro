@@ -83,13 +83,13 @@
         x, len, seed: rand(0, TAU), curl: rand(8, 20), curlF: rand(0.012, 0.022), sway: rand(10, 22),
         chars: fillChars(len),
         tip: Math.random() < 0.7 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null,
-        grown: 0, growSpeed: rand(1.6, 3.4), state: 'grow', alpha: 1, hold: 0, delay: rand(0, 160),
+        grown: 0, growSpeed: rand(0.5, 1.1), state: 'grow', alpha: 1, hold: 0, delay: rand(0, 200),
       };
     };
     const resetStrand = (s) => {
       s.len = rand(150, 380); s.chars = fillChars(s.len); s.seed = rand(0, TAU);
       s.tip = Math.random() < 0.7 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null;
-      s.grown = 0; s.growSpeed = rand(1.6, 3.4); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(20, 140);
+      s.grown = 0; s.growSpeed = rand(0.5, 1.1); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(30, 180);
     };
     const gardenInit = () => {
       strands = []; lights = []; falling = [];
@@ -99,6 +99,23 @@
       for (let x = 40; x < w; x += rand(60, 100)) lights.push({ x, phase: rand(0, TAU), ch: randChar() });
     };
     const strandX = (s, d, t) => s.x + Math.sin(d * s.curlF + s.seed) * s.curl + Math.sin(t * 0.6 + s.seed) * s.sway * (d / s.len);
+
+    // Big ASCII flower (rendered as a small glyph grid)
+    const FLOWER_ART = [' @@ ', '@@@@', '@@O@@', ' @@ '];
+    const drawFlowerAscii = (cx, cy, color, alpha) => {
+      const cw = 8, chh = 12;
+      ctx.font = 'bold 15px ui-monospace, monospace';
+      for (let r = 0; r < FLOWER_ART.length; r++) {
+        const row = FLOWER_ART[r];
+        for (let c = 0; c < row.length; c++) {
+          const ch = row[c];
+          if (ch === ' ') continue;
+          ctx.fillStyle = ch === 'O' ? rgba([250, 204, 21], alpha) : rgba(color, alpha);
+          ctx.fillText(ch, cx + (c - row.length / 2) * cw, cy + (r - FLOWER_ART.length / 2) * chh);
+        }
+      }
+      ctx.font = '13px ui-monospace, monospace';
+    };
 
     const gardenFrame = () => {
       ctx.clearRect(0, 0, w, h);
@@ -126,14 +143,14 @@
 
         if (s.state === 'grow') {
           s.grown += s.growSpeed;
-          if (s.grown >= s.len) { s.grown = s.len; s.state = 'hold'; s.hold = 40; }
+          if (s.grown >= s.len) { s.grown = s.len; s.state = 'hold'; s.hold = 120; }
         } else if (s.state === 'hold') {
           if (--s.hold <= 0) {
             s.state = 'fade';
-            if (s.tip) falling.push({ x: strandX(s, s.len, t), y: 8 + s.len, vy: rand(0.5, 1.1), alpha: 1, color: s.tip, rot: 0, rotV: rand(-0.06, 0.06) });
+            if (s.tip) falling.push({ x: strandX(s, s.len, t), y: 8 + s.len, vy: rand(0.25, 0.6), alpha: 1, color: s.tip, wob: rand(0, TAU) });
           }
         } else if (s.state === 'fade') {
-          s.alpha -= 0.02;
+          s.alpha -= 0.008;
           if (s.alpha <= 0) resetStrand(s);
         }
 
@@ -146,26 +163,19 @@
           ctx.fillStyle = rgba(STEM, depthFade * s.alpha);
           ctx.fillText(c.ch, x, y);
         }
-        // static tip bloom only while fully grown & holding (before it drops)
+        // big ascii bloom while fully grown & holding (before it drops)
         if (s.tip && s.state === 'hold') {
-          ctx.font = 'bold 15px ui-monospace, monospace';
-          ctx.fillStyle = rgba(s.tip, 0.95 * s.alpha);
-          ctx.fillText('❀', strandX(s, s.len, t), 8 + s.len + STEPY);
-          ctx.font = '13px ui-monospace, monospace';
+          drawFlowerAscii(strandX(s, s.len, t), 8 + s.len + STEPY, s.tip, 0.95 * s.alpha);
         }
       }
 
-      // falling flowers
-      ctx.font = 'bold 15px ui-monospace, monospace';
+      // falling ascii flowers
       falling = falling.filter((f) => {
-        f.vy += 0.02; f.y += f.vy; f.alpha -= 0.006; f.rot += f.rotV;
-        if (f.alpha <= 0 || f.y > h + 20) return false;
-        ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot);
-        ctx.fillStyle = rgba(f.color, Math.max(0, f.alpha));
-        ctx.fillText('❀', 0, 0); ctx.restore();
+        f.vy += 0.008; f.y += f.vy; f.wob += 0.05; f.x += Math.sin(f.wob) * 0.6; f.alpha -= 0.004;
+        if (f.alpha <= 0 || f.y > h + 30) return false;
+        drawFlowerAscii(f.x, f.y, f.color, Math.max(0, f.alpha));
         return true;
       });
-      ctx.font = '13px ui-monospace, monospace';
     };
 
     /* ---------- driver ---------- */
