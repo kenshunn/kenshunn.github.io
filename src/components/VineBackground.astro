@@ -66,7 +66,7 @@
     const STEM = [54, 110, 68], LEAF = [86, 148, 96], GLOW = [255, 214, 130];
     const FLOWERS = [[231, 84, 128], [239, 68, 68], [245, 158, 11], [168, 85, 247], [236, 72, 153], [250, 204, 21], [59, 130, 246]];
     let strands = [], lights = [], bottomStems = [];
-    let gardenHidden = false;
+    let gardenHidden = false, bottomHidden = false;
     const t0 = performance.now();
 
     const CHARSET = '01{}[]()<>/\\;:*#+=$%&|!?~^'.split('');
@@ -85,13 +85,13 @@
         x, len, seed: rand(0, TAU), curl: rand(8, 20), curlF: rand(0.012, 0.022), sway: rand(10, 22),
         chars: fillChars(len),
         tip: Math.random() < 0.7 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null,
-        grown: 0, growSpeed: rand(0.5, 1.1), state: 'grow', alpha: 1, hold: 0, delay: rand(0, 200),
+        grown: 0, growSpeed: rand(0.3, 0.7), state: 'grow', alpha: 1, hold: 0, delay: rand(0, 200),
       };
     };
     const resetStrand = (s) => {
       s.len = rand(150, 380); s.chars = fillChars(s.len); s.seed = rand(0, TAU);
       s.tip = Math.random() < 0.7 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null;
-      s.grown = 0; s.growSpeed = rand(0.5, 1.1); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(30, 180);
+      s.grown = 0; s.growSpeed = rand(0.3, 0.7); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(30, 180);
     };
     const gardenInit = () => {
       strands = []; lights = []; falling = []; bottomStems = [];
@@ -148,7 +148,7 @@
     };
     const makeBottomStem = (x) => {
       const len = rand(60, 150);
-      return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.2, 0.45), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
+      return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.12, 0.28), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
     };
 
     const gardenFrame = () => {
@@ -234,6 +234,7 @@
 
       // bottom garden — grows only while visible (bf>0); paused + persistent otherwise
       if (bf > 0) {
+        if (bottomHidden) bottomHidden = false;
         const fr = document.querySelector('.footer');
         const baseY = fr ? fr.getBoundingClientRect().top : h;
         ctx.font = '13px ui-monospace, monospace';
@@ -260,6 +261,10 @@
             drawArt(b.x + swayX, baseY - 4 - b.len, b.type.art, b.type.color, bf);
           }
         }
+      } else if (!bottomHidden) {
+        // scrolled away from the bottom: wilt + reset so it regrows fresh next time
+        bottomHidden = true;
+        bottomStems.forEach((b) => Object.assign(b, makeBottomStem(b.x)));
       }
     };
 
