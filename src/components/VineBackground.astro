@@ -65,7 +65,7 @@
     /* ---------- Effect B: hanging vine garland + flowers + fairy lights (light) ---------- */
     const STEM = [54, 110, 68], LEAF = [86, 148, 96], GLOW = [255, 214, 130];
     const FLOWERS = [[231, 84, 128], [239, 68, 68], [245, 158, 11], [168, 85, 247], [236, 72, 153], [250, 204, 21], [59, 130, 246]];
-    let strands = [], lights = [];
+    let strands = [], lights = [], bottomStems = [];
     let gardenHidden = false;
     const t0 = performance.now();
 
@@ -93,11 +93,12 @@
       s.grown = 0; s.growSpeed = rand(0.5, 1.1); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(30, 180);
     };
     const gardenInit = () => {
-      strands = []; lights = []; falling = [];
+      strands = []; lights = []; falling = []; bottomStems = [];
       const gap = 130;
       for (let x = 0; x <= w; x += gap) strands.push(makeStrand(x + rand(-25, 25)));
       for (let k = 0; k < 5; k++) { strands.push(makeStrand(rand(0, 150))); strands.push(makeStrand(w - rand(0, 150))); }
       for (let x = 40; x < w; x += rand(60, 100)) lights.push({ x, phase: rand(0, TAU), ch: randChar() });
+      for (let x = 50; x < w; x += rand(70, 130)) bottomStems.push(makeBottomStem(x + rand(-20, 20)));
     };
     const strandX = (s, d, t) => s.x + Math.sin(d * s.curlF + s.seed) * s.curl + Math.sin(t * 0.6 + s.seed) * s.sway * (d / s.len);
 
@@ -119,14 +120,48 @@
       ctx.font = '13px ui-monospace, monospace';
     };
 
+    // Bottom garden — sunflowers, roses, tulips as ASCII art, growing up from the base.
+    const BLOOMS = [
+      { art: ['\\|/', '-O-', '/|\\'], color: [250, 204, 21] }, // sunflower
+      { art: ['(@)', '@@@', ' | '], color: [231, 84, 128] },   // rose pink
+      { art: ['(@)', '@@@', ' | '], color: [239, 68, 68] },    // rose red
+      { art: ['\\_/', ' | '], color: [168, 85, 247] },         // tulip purple
+      { art: ['\\_/', ' | '], color: [236, 72, 153] },         // tulip magenta
+      { art: ['\\_/', ' | '], color: [59, 130, 246] },         // tulip blue
+      { art: ['\\_/', ' | '], color: [245, 158, 11] },         // tulip orange
+    ];
+    const drawArt = (cx, cy, art, color, alpha) => {
+      if (alpha <= 0) return;
+      const cw = 7, chh = 12;
+      ctx.font = 'bold 13px ui-monospace, monospace';
+      for (let r = 0; r < art.length; r++) {
+        const row = art[r];
+        for (let c = 0; c < row.length; c++) {
+          const ch = row[c];
+          if (ch === ' ') continue;
+          ctx.fillStyle = ch === 'O' ? rgba([120, 72, 20], alpha) : rgba(color, alpha);
+          ctx.fillText(ch, cx + (c - row.length / 2) * cw, cy + (r - art.length + 0.5) * chh);
+        }
+      }
+      ctx.font = '13px ui-monospace, monospace';
+    };
+    const makeBottomStem = (x) => {
+      const len = rand(70, 200);
+      return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.35, 0.8), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
+    };
+
     const gardenFrame = () => {
       ctx.clearRect(0, 0, w, h);
       const t = (performance.now() - t0) * 0.001;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-      // fade the whole garland out as the hero scrolls away
+      // fades: top garland near the hero, bottom garden near the page end
       const sf = Math.max(0, 1 - window.scrollY / (h * 0.85));
-      if (sf <= 0) { falling.length = 0; gardenHidden = true; return; }
+      const docH = document.documentElement.scrollHeight;
+      const bf = Math.max(0, 1 - (docH - (window.scrollY + h)) / (h * 0.85));
+
+      if (sf <= 0) { gardenHidden = true; falling.length = 0; }
+      else {
       // returning to the top: regrow everything from the start (staggered)
       if (gardenHidden) {
         gardenHidden = false;
@@ -188,6 +223,28 @@
         drawFlowerAscii(f.x, f.y, f.color, Math.max(0, f.alpha) * sf);
         return true;
       });
+      } // end top garland
+
+      // bottom garden — grows only while visible (bf>0); paused + persistent otherwise
+      if (bf > 0) {
+        ctx.font = '13px ui-monospace, monospace';
+        for (const b of bottomStems) {
+          if (b.grown < b.len) b.grown += b.growSpeed;
+          for (const c of b.chars) {
+            if (c.d > b.grown) break;
+            const swayX = Math.sin(t * 0.6 + b.seed) * b.sway * (c.d / b.len);
+            const x = b.x + swayX;
+            const y = h - 6 - c.d;
+            if (Math.random() < 0.01) c.ch = randChar();
+            ctx.fillStyle = rgba(STEM, (0.35 + 0.45 * (1 - c.d / b.len)) * bf);
+            ctx.fillText(c.ch, x, y);
+          }
+          if (b.grown >= b.len) {
+            const swayX = Math.sin(t * 0.6 + b.seed) * b.sway;
+            drawArt(b.x + swayX, h - 6 - b.len, b.type.art, b.type.color, bf);
+          }
+        }
+      }
     };
 
     /* ---------- driver ---------- */
