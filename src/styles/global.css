@@ -14,15 +14,12 @@
   --accent: #6366f1;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; background: var(--bg); }
 
-/* One full-viewport panel per section, snapped. */
-html { scroll-snap-type: y mandatory; }
+/* One full-viewport panel per section (no snap). */
 main > section,
 main > .coursework {
   min-height: 100vh;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -30,7 +27,7 @@ main > .coursework {
 
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  background: var(--bg);
+  background: transparent;
   color: var(--text);
   line-height: 1.6;
 }
