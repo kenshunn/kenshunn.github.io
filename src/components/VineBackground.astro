@@ -37,31 +37,16 @@
 
     /* ---------- Effect A: constellation + starfield (dark) ---------- */
     const LINK = 130;
-    let particles = [], stars = [];
+    let particles = [];
     const conInit = () => {
       const count = Math.min(90, Math.round((w * h) / 22000));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         vx: rand(-0.3, 0.3), vy: rand(-0.3, 0.3),
       }));
-      const sc = Math.min(260, Math.round((w * h) / 6000));
-      stars = Array.from({ length: sc }, () => {
-        const z = Math.random();
-        return { x: Math.random() * w, y: Math.random() * h, z, tw: rand(0, TAU) };
-      });
     };
     const conFrame = () => {
       ctx.clearRect(0, 0, w, h);
-      const t = performance.now() * 0.001;
-      // starfield — parallax drift + twinkle
-      for (const s of stars) {
-        s.y += 0.05 + s.z * 0.35;
-        if (s.y > h + 2) { s.y = -2; s.x = Math.random() * w; }
-        const a = (0.25 + s.z * 0.5) * (0.6 + 0.4 * Math.sin(t * 1.5 + s.tw));
-        ctx.beginPath(); ctx.arc(s.x, s.y, 0.5 + s.z * 1.3, 0, TAU);
-        ctx.fillStyle = rgba(MUTED, a); ctx.fill();
-      }
-      // constellation
       for (const p of particles) {
         p.x += p.vx; p.y += p.vy;
         if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
@@ -85,22 +70,35 @@
 
     const CHARSET = '01{}[]()<>/\\;:*#+=$%&|!?~^'.split('');
     const STEPY = 16; // vertical char spacing
-    const makeStrand = (x) => {
-      const len = rand(140, 380);
+    let falling = [];
+    const randChar = () => CHARSET[Math.floor(Math.random() * CHARSET.length)];
+    const fillChars = (len) => {
       const chars = [];
-      for (let d = STEPY; d < len; d += STEPY) chars.push({ d, ch: CHARSET[Math.floor(Math.random() * CHARSET.length)], flip: rand(0, 1) });
+      for (let d = STEPY; d < len; d += STEPY) chars.push({ d, ch: randChar() });
+      return chars;
+    };
+    const makeStrand = (x) => {
+      const len = rand(150, 380);
       return {
-        x, len, seed: rand(0, TAU), curl: rand(8, 20), curlF: rand(0.012, 0.022), sway: rand(10, 22), chars,
-        tip: Math.random() < 0.6 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null,
+        x, len, seed: rand(0, TAU), curl: rand(8, 20), curlF: rand(0.012, 0.022), sway: rand(10, 22),
+        chars: fillChars(len),
+        tip: Math.random() < 0.7 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null,
+        grown: 0, growSpeed: rand(1.6, 3.4), state: 'grow', alpha: 1, hold: 0, delay: rand(0, 160),
       };
     };
+    const resetStrand = (s) => {
+      s.len = rand(150, 380); s.chars = fillChars(s.len); s.seed = rand(0, TAU);
+      s.tip = Math.random() < 0.7 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null;
+      s.grown = 0; s.growSpeed = rand(1.6, 3.4); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(20, 140);
+    };
     const gardenInit = () => {
-      strands = []; lights = [];
+      strands = []; lights = []; falling = [];
       const gap = 130;
       for (let x = 0; x <= w; x += gap) strands.push(makeStrand(x + rand(-25, 25)));
       for (let k = 0; k < 5; k++) { strands.push(makeStrand(rand(0, 150))); strands.push(makeStrand(w - rand(0, 150))); }
-      for (let x = 40; x < w; x += rand(60, 100)) lights.push({ x, phase: rand(0, TAU), ch: CHARSET[Math.floor(Math.random() * CHARSET.length)] });
+      for (let x = 40; x < w; x += rand(60, 100)) lights.push({ x, phase: rand(0, TAU), ch: randChar() });
     };
+    const strandX = (s, d, t) => s.x + Math.sin(d * s.curlF + s.seed) * s.curl + Math.sin(t * 0.6 + s.seed) * s.sway * (d / s.len);
 
     const gardenFrame = () => {
       ctx.clearRect(0, 0, w, h);
@@ -112,7 +110,7 @@
       for (let x = 0; x <= w; x += 20) ctx.lineTo(x, 8 + Math.sin(x * 0.01) * 6);
       ctx.strokeStyle = rgba(STEM, 0.35); ctx.lineWidth = 1; ctx.stroke();
 
-      // fairy-light glyphs on the wire
+      // fairy-light glyphs
       ctx.font = '13px ui-monospace, monospace';
       for (const L of lights) {
         const y = 8 + Math.sin(L.x * 0.01) * 6;
@@ -121,28 +119,53 @@
         ctx.fillText(L.ch, L.x, y);
       }
 
-      // hanging strands of ascii
+      // strands lifecycle: grow -> hold -> flower drops -> fade -> regrow
       ctx.font = '13px ui-monospace, monospace';
       for (const s of strands) {
-        let lastX = s.x, lastY = 8;
-        for (const c of s.chars) {
-          const swayX = Math.sin(t * 0.6 + s.seed) * s.sway * (c.d / s.len);
-          const x = s.x + Math.sin(c.d * s.curlF + s.seed) * s.curl + swayX;
-          const y = 8 + c.d;
-          const fade = 0.35 + 0.5 * (1 - c.d / s.len);
-          // occasional flicker to a new glyph
-          if (Math.random() < 0.01) c.ch = CHARSET[Math.floor(Math.random() * CHARSET.length)];
-          ctx.fillStyle = rgba(STEM, fade);
-          ctx.fillText(c.ch, x, y);
-          lastX = x; lastY = y;
+        if (s.delay > 0) { s.delay--; continue; }
+
+        if (s.state === 'grow') {
+          s.grown += s.growSpeed;
+          if (s.grown >= s.len) { s.grown = s.len; s.state = 'hold'; s.hold = 40; }
+        } else if (s.state === 'hold') {
+          if (--s.hold <= 0) {
+            s.state = 'fade';
+            if (s.tip) falling.push({ x: strandX(s, s.len, t), y: 8 + s.len, vy: rand(0.5, 1.1), alpha: 1, color: s.tip, rot: 0, rotV: rand(-0.06, 0.06) });
+          }
+        } else if (s.state === 'fade') {
+          s.alpha -= 0.02;
+          if (s.alpha <= 0) resetStrand(s);
         }
-        if (s.tip) {
+
+        for (const c of s.chars) {
+          if (c.d > s.grown) break;
+          const x = strandX(s, c.d, t);
+          const y = 8 + c.d;
+          if (Math.random() < 0.01) c.ch = randChar();
+          const depthFade = 0.35 + 0.5 * (1 - c.d / s.len);
+          ctx.fillStyle = rgba(STEM, depthFade * s.alpha);
+          ctx.fillText(c.ch, x, y);
+        }
+        // static tip bloom only while fully grown & holding (before it drops)
+        if (s.tip && s.state === 'hold') {
           ctx.font = 'bold 15px ui-monospace, monospace';
-          ctx.fillStyle = rgba(s.tip, 0.95);
-          ctx.fillText('❀', lastX, lastY + STEPY);
+          ctx.fillStyle = rgba(s.tip, 0.95 * s.alpha);
+          ctx.fillText('❀', strandX(s, s.len, t), 8 + s.len + STEPY);
           ctx.font = '13px ui-monospace, monospace';
         }
       }
+
+      // falling flowers
+      ctx.font = 'bold 15px ui-monospace, monospace';
+      falling = falling.filter((f) => {
+        f.vy += 0.02; f.y += f.vy; f.alpha -= 0.006; f.rot += f.rotV;
+        if (f.alpha <= 0 || f.y > h + 20) return false;
+        ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot);
+        ctx.fillStyle = rgba(f.color, Math.max(0, f.alpha));
+        ctx.fillText('❀', 0, 0); ctx.restore();
+        return true;
+      });
+      ctx.font = '13px ui-monospace, monospace';
     };
 
     /* ---------- driver ---------- */
