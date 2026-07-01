@@ -76,7 +76,7 @@
     const fillChars = (len) => {
       const chars = [];
       let i = 0;
-      for (let d = STEPY; d < len; d += STEPY) { chars.push({ d, ch: randChar(), leaf: i % 3 === 1 ? (i % 6 === 1 ? 1 : -1) : 0 }); i++; }
+      for (let d = STEPY; d < len; d += STEPY) { chars.push({ d, ch: randChar(), leaf: i % 2 === 1 ? (Math.floor(i / 2) % 2 === 0 ? 1 : -1) : 0 }); i++; }
       return chars;
     };
     const makeStrand = (x) => {
@@ -95,9 +95,9 @@
     };
     const gardenInit = () => {
       strands = []; lights = []; falling = []; bottomStems = [];
-      const gap = 130;
-      for (let x = 0; x <= w; x += gap) strands.push(makeStrand(x + rand(-25, 25)));
-      for (let k = 0; k < 5; k++) { strands.push(makeStrand(rand(0, 150))); strands.push(makeStrand(w - rand(0, 150))); }
+      const gap = 190;
+      for (let x = gap / 2; x <= w; x += gap) strands.push(makeStrand(x + rand(-30, 30)));
+      for (let k = 0; k < 2; k++) { strands.push(makeStrand(rand(20, 160))); strands.push(makeStrand(w - rand(20, 160))); }
       for (let x = 40; x < w; x += rand(60, 100)) lights.push({ x, phase: rand(0, TAU), ch: randChar() });
       for (let x = 50; x < w; x += rand(70, 130)) bottomStems.push(makeBottomStem(x + rand(-20, 20)));
     };
@@ -210,7 +210,12 @@
           const depthFade = 0.35 + 0.5 * (1 - c.d / s.len);
           ctx.fillStyle = rgba(STEM, depthFade * s.alpha * sf);
           ctx.fillText(c.ch, x, y);
-          if (c.leaf) { ctx.fillStyle = rgba(LEAF, depthFade * s.alpha * sf); ctx.fillText(c.leaf < 0 ? '<' : '>', x + c.leaf * 9, y); }
+          if (c.leaf) {
+            ctx.font = 'bold 17px ui-monospace, monospace';
+            ctx.fillStyle = rgba(LEAF, Math.min(1, depthFade * 1.7) * s.alpha * sf);
+            ctx.fillText(c.leaf < 0 ? '❰' : '❱', x + c.leaf * 12, y);
+            ctx.font = '13px ui-monospace, monospace';
+          }
         }
         // big ascii bloom while fully grown & holding (before it drops)
         if (s.tip && s.state === 'hold') {
@@ -241,7 +246,12 @@
             const df = (0.35 + 0.45 * (1 - c.d / b.len)) * bf;
             ctx.fillStyle = rgba(STEM, df);
             ctx.fillText(c.ch, x, y);
-            if (c.leaf) { ctx.fillStyle = rgba(LEAF, df); ctx.fillText(c.leaf < 0 ? '<' : '>', x + c.leaf * 9, y); }
+            if (c.leaf) {
+              ctx.font = 'bold 17px ui-monospace, monospace';
+              ctx.fillStyle = rgba(LEAF, Math.min(1, df * 1.7));
+              ctx.fillText(c.leaf < 0 ? '❰' : '❱', x + c.leaf * 12, y);
+              ctx.font = '13px ui-monospace, monospace';
+            }
           }
           if (b.grown >= b.len) {
             const swayX = Math.sin(t * 0.6 + b.seed) * b.sway;
