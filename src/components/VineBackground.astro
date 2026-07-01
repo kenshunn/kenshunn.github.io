@@ -66,6 +66,7 @@
     const STEM = [54, 110, 68], LEAF = [86, 148, 96], GLOW = [255, 214, 130];
     const FLOWERS = [[231, 84, 128], [239, 68, 68], [245, 158, 11], [168, 85, 247], [236, 72, 153], [250, 204, 21], [59, 130, 246]];
     let strands = [], lights = [];
+    let gardenHidden = false;
     const t0 = performance.now();
 
     const CHARSET = '01{}[]()<>/\\;:*#+=$%&|!?~^'.split('');
@@ -125,7 +126,13 @@
 
       // fade the whole garland out as the hero scrolls away
       const sf = Math.max(0, 1 - window.scrollY / (h * 0.85));
-      if (sf <= 0) { falling.length = 0; return; }
+      if (sf <= 0) { falling.length = 0; gardenHidden = true; return; }
+      // returning to the top: regrow everything from the start (staggered)
+      if (gardenHidden) {
+        gardenHidden = false;
+        falling.length = 0;
+        strands.forEach((s, i) => { resetStrand(s); s.delay = i * 6 + rand(0, 40); });
+      }
 
       // top wire
       ctx.beginPath(); ctx.moveTo(0, 8);
