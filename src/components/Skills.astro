@@ -9,7 +9,7 @@ const badgeUrl = (s) => {
 };
 const groupData = (g) =>
   JSON.stringify(
-    g.items.map((s) => ({ name: s.name, level: s.level, detail: s.detail, color: s.color, badge: badgeUrl(s) }))
+    g.items.map((s) => ({ name: s.name, level: s.level, pct: s.pct, detail: s.detail, color: s.color, badge: badgeUrl(s) }))
   );
 ---
 <section id="skills" class="skills reveal">
@@ -29,12 +29,17 @@ const groupData = (g) =>
               class="skill-trigger"
               data-name={s.name}
               data-level={s.level}
+              data-pct={s.pct}
               data-detail={s.detail}
               data-color={s.color}
               data-badge={badgeUrl(s)}
               aria-label={`${s.name} details`}
             >
-              <img class="skill-badge" src={badgeUrl(s)} alt={s.name} height="30" loading="lazy" />
+              {s.logoUrl ? (
+                <span class="skill-chip"><img src={s.logoUrl} alt="" />{s.name}</span>
+              ) : (
+                <img class="skill-badge" src={badgeUrl(s)} alt={s.name} height="30" loading="lazy" />
+              )}
             </button>
           ))}
         </div>

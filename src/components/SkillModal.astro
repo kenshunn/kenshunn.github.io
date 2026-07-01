@@ -65,7 +65,7 @@
     (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const rowHtml = (s) => {
-    const pct = PERCENT[s.level] || 60;
+    const pct = s.pct != null ? +s.pct : (PERCENT[s.level] || 60);
     const color = '#' + (s.color || '6366f1');
     return `
       <div class="skill-row">
@@ -117,6 +117,7 @@
       render(btn.getAttribute('data-name') || 'Skill', [{
         name: btn.getAttribute('data-name'),
         level: btn.getAttribute('data-level'),
+        pct: btn.getAttribute('data-pct'),
         detail: btn.getAttribute('data-detail'),
         color: btn.getAttribute('data-color'),
         badge: btn.getAttribute('data-badge'),
