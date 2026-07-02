@@ -1,5 +1,6 @@
 ---
 import projects from '../data/projects.js';
+import Coursework from './Coursework.astro';
 const featured = projects.filter((p) => p.featured);
 const rest = projects.filter((p) => !p.featured);
 ---
@@ -67,6 +68,8 @@ const rest = projects.filter((p) => !p.featured);
     </div>
     <button type="button" class="carousel-btn next" aria-label="Next projects">&#8250;</button>
   </div>
+
+  <Coursework />
 </section>
 
 <style is:global>

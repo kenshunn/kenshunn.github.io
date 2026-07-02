@@ -1,0 +1,44 @@
+---
+const experience = [
+  {
+    role: 'Web Developer Intern',
+    company: 'Company Name',
+    period: 'Apr 2025 – Present',
+    bullets: [
+      'Building and maintaining web application features.',
+      'Collaborating with the team on real-world projects.',
+    ],
+  },
+];
+---
+<section id="experience" class="experience-section reveal">
+  <p class="eyebrow">What I've done</p>
+  <h2>Experience</h2>
+  <div class="timeline">
+    {experience.map((e) => (
+      <div class="tl-item">
+        <h3 class="tl-role">{e.role}</h3>
+        <p class="tl-meta">{e.company} · {e.period}</p>
+        <ul>
+          {e.bullets.map((b) => <li>{b}</li>)}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style is:global>
+  .timeline {
+    position: relative; max-width: 760px; margin: 0;
+    padding-left: 1.75rem; border-left: 2px solid color-mix(in srgb, var(--muted) 30%, transparent);
+  }
+  .tl-item { position: relative; padding-bottom: 1.75rem; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before {
+    content: ''; position: absolute; left: calc(-1.75rem - 6px); top: 5px;
+    width: 11px; height: 11px; border-radius: 50%; background: var(--accent);
+  }
+  .tl-role { font-size: 1.15rem; }
+  .tl-meta { color: var(--muted); font-size: 0.9rem; margin: 0.15rem 0 0.6rem; }
+  .tl-item ul { margin: 0 0 0 1.1rem; color: var(--muted); line-height: 1.6; }
+</style>
