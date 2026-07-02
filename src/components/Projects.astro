@@ -21,26 +21,32 @@ const rest = projects.filter((p) => !p.featured);
   </div>
 
   {featured.length > 0 && (
-    <div class="featured-row">
-      {featured.map((p) => (
-        <article class="card featured-project">
-          <span class="featured-badge">★ Featured</span>
-          <img class="featured-img" src={p.image} alt={p.title} draggable="false" />
-          <div class="featured-body">
-            <h3>{p.title}</h3>
-            <p class="project-desc">{p.description}</p>
-            <ul class="tags">
-              {p.tags.map((t) => <li>{t}</li>)}
-            </ul>
-            <div class="project-links">
-              {p.liveUrl && (
-                <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
-              )}
-              <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
-            </div>
-          </div>
-        </article>
-      ))}
+    <div class="featured-row project-carousel">
+      {featured.length > 1 && <button type="button" class="carousel-btn prev" aria-label="Previous featured">&#8249;</button>}
+      <div class="project-viewport">
+        <div class="project-track">
+          {featured.map((p) => (
+            <article class="card project-card featured-project">
+              <span class="featured-badge">★ Featured</span>
+              <img class="featured-img" src={p.image} alt={p.title} draggable="false" />
+              <div class="featured-body">
+                <h3>{p.title}</h3>
+                <p class="project-desc">{p.description}</p>
+                <ul class="tags">
+                  {p.tags.map((t) => <li>{t}</li>)}
+                </ul>
+                <div class="project-links">
+                  {p.liveUrl && (
+                    <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
+                  )}
+                  <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+      {featured.length > 1 && <button type="button" class="carousel-btn next" aria-label="Next featured">&#8250;</button>}
     </div>
   )}
 
@@ -86,11 +92,15 @@ const rest = projects.filter((p) => !p.featured);
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
 
-  /* Featured project — static row above the carousel, not scrollable. */
+  /* Featured project — 1-at-a-time carousel above the grid. */
   .featured-row { margin-bottom: 2rem; }
-  .featured-project {
-    position: relative;
-    display: flex; gap: 1.5rem; align-items: center;
+  .featured-row .project-card {
+    flex: 0 0 100%;
+    display: flex; flex-direction: row; align-items: center; gap: 1.5rem;
+  }
+  .featured-project { position: relative; }
+  @media (max-width: 700px) {
+    .featured-row .project-card { flex-direction: column; align-items: stretch; }
   }
   .featured-img {
     flex: 0 0 300px; width: 300px; height: 200px;

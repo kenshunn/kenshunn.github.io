@@ -11,6 +11,16 @@ const projects = [
     featured: true,
   },
   {
+    title: 'Biñan Access Card',
+    description:
+      'An access-card / ID management system for the City Government of Biñan — built during my web developer internship.',
+    tags: ['PHP', 'MySQL', 'JavaScript'],
+    repoUrl: 'https://github.com/daki-crypto/binan_accesscard',
+    liveUrl: '',
+    image: '/images/placeholder.png',
+    featured: true,
+  },
+  {
     title: 'Clock In',
     description:
       'Proximity-aware attendance authentication using Bluetooth Low Energy beacons. Restricts app access to specific WiFi SSIDs, binds devices to accounts for a BYOD policy, and delivers real-time in-app notifications and user feedback.',
