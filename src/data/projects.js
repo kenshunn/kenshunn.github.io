@@ -17,7 +17,7 @@ const projects = [
     tags: ['PHP', 'MySQL', 'JavaScript'],
     repoUrl: 'https://github.com/daki-crypto/binan_accesscard',
     liveUrl: '',
-    image: 'https://raw.githubusercontent.com/daki-crypto/binan_accesscard/Mel-import-branch/public/assets/image/binan.png',
+    image: '/images/binan.png',
     featured: true,
   },
   {
