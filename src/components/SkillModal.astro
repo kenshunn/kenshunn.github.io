@@ -64,24 +64,11 @@
   const esc = (s) =>
     (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const rowHtml = (s) => {
-    const pct = s.pct != null ? +s.pct : (PERCENT[s.level] || 60);
-    const color = '#' + (s.color || '6366f1');
-    return `
+  const rowHtml = (s) => `
       <div class="skill-row">
-        <div class="skill-row-top">
-          <img src="${s.badge}" alt="${esc(s.name)}" />
-          <div class="skill-meter">
-            <div class="skill-meter-head">
-              <span class="lvl">${esc(s.level || '')}</span>
-              <span class="pct">${pct}%</span>
-            </div>
-            <div class="skill-bar"><div class="skill-bar-fill" data-pct="${pct}" style="background:${color}"></div></div>
-          </div>
-        </div>
+        <div class="skill-row-top"><img src="${s.badge}" alt="${esc(s.name)}" /></div>
         <p>${esc(s.detail || '')}</p>
       </div>`;
-  };
 
   const render = (title, items) => {
     if (titleEl) titleEl.textContent = title;
