@@ -1,0 +1,52 @@
+---
+const DOC_ID = '1sH0LkMZdnhMKOrCUtSa0bW4SWmih_u5TY0lxNlwKXHE';
+---
+<div class="doc-modal" id="practicum-modal" role="dialog" aria-modal="true" aria-label="Practicum Final Report" hidden>
+  <div class="doc-backdrop" data-doc-close></div>
+  <div class="doc-box">
+    <div class="doc-head">
+      <h3>Practicum Final Report</h3>
+      <button type="button" class="doc-close" aria-label="Close" data-doc-close>&times;</button>
+    </div>
+    <iframe class="doc-frame" src={`https://docs.google.com/document/d/${DOC_ID}/preview`} title="Practicum Final Report"></iframe>
+    <div class="doc-foot">
+      <a class="btn btn-primary" href={`https://docs.google.com/document/d/${DOC_ID}/view`} target="_blank" rel="noreferrer">Open in Google Docs</a>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .doc-modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .doc-modal[hidden] { display: none; }
+  .doc-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(2px); }
+  .doc-box {
+    position: relative; display: flex; flex-direction: column;
+    width: min(1000px, 100%); height: min(92vh, 100%);
+    background: var(--surface); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+    border-radius: 1rem; overflow: hidden;
+  }
+  .doc-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem; border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
+  }
+  .doc-close { background: none; border: none; color: var(--muted); font-size: 1.75rem; line-height: 1; cursor: pointer; }
+  .doc-close:hover { color: var(--text); }
+  .doc-frame { flex: 1; width: 100%; border: none; background: #fff; }
+  .doc-foot {
+    display: flex; justify-content: center; padding: 1rem 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--muted) 20%, transparent);
+  }
+</style>
+
+<script>
+  const modal = document.getElementById('practicum-modal');
+  const opener = document.getElementById('practicum-open');
+  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
+  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
+  opener?.addEventListener('click', open);
+  modal?.querySelectorAll('[data-doc-close]').forEach((el) => el.addEventListener('click', close));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
+  });
+</script>
