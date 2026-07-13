@@ -6,8 +6,10 @@ import gsap from 'gsap';
 if (!window.__gsapTransitions) {
   window.__gsapTransitions = true;
   const veil = () => document.getElementById('page-veil');
+  const motionOff = () => document.documentElement.getAttribute('data-motion') === 'off';
 
   document.addEventListener('astro:before-preparation', () => {
+    if (motionOff()) return;
     const v = veil();
     if (v) {
       v.classList.add('veil-on'); // CSS drives the backdrop blur
@@ -16,6 +18,7 @@ if (!window.__gsapTransitions) {
   });
 
   document.addEventListener('astro:page-load', () => {
+    if (motionOff()) { const v = veil(); if (v) { gsap.set(v, { autoAlpha: 0 }); v.classList.remove('veil-on'); } return; }
     const v = veil();
     if (v) {
       gsap.to(v, {

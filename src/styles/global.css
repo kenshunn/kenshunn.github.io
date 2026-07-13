@@ -145,6 +145,13 @@ h2 { font-size: 2rem; margin-bottom: 1.5rem; }
 [data-theme='light'] .ico-sun { display: none; }
 [data-theme='light'] .ico-moon { display: block; }
 
+/* Motion (play/pause) icon swap + effect */
+.ico-play { display: none; }
+[data-motion='off'] .ico-play { display: block; }
+[data-motion='off'] .ico-pause { display: none; }
+[data-motion='off'] .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+[data-motion='off'] #cursor { display: none; }
+
 /* Top-center status pill — theme toggle + current page label (yevtam-style) */
 .topbar {
   position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 60;
@@ -171,7 +178,10 @@ h2 { font-size: 2rem; margin-bottom: 1.5rem; }
 
 /* Hero */
 /* Home page fills the viewport exactly — no scroll (hero only lives here) */
-body:has(.hero) { overflow: hidden; padding-bottom: 0; }
+body:has(.hero) {
+  overflow: hidden; padding-bottom: 0;
+  background: radial-gradient(100% 75% at 50% -8%, color-mix(in srgb, var(--accent) 7%, var(--bg)), var(--bg) 68%);
+}
 body:has(.hero) .hero { padding-top: 0; padding-bottom: 0; min-height: 100vh; }
 
 /* Hero — centered editorial column (name small, tagline is the headline) */

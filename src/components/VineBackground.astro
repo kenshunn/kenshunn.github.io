@@ -355,7 +355,8 @@
     };
 
     /* ---------- driver ---------- */
-    let active = null, running = true, raf = 0;
+    const motionOff = () => document.documentElement.getAttribute('data-motion') === 'off';
+    let active = null, running = !motionOff(), raf = 0;
     const pick = () => {
       readColors();
       const light = document.documentElement.getAttribute('data-theme') === 'light';
@@ -368,17 +369,22 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       pick();
     };
-    const onVis = () => { const was = running; running = !document.hidden; if (running && !was) frame(); };
+    const frame = () => { if (!running) return; active.frame(); raf = requestAnimationFrame(frame); };
+    const onVis = () => { const was = running; running = !document.hidden && !motionOff(); if (running && !was) frame(); };
     window.addEventListener('resize', resize);
-    const mo = new MutationObserver(pick);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const mo = new MutationObserver((muts) => {
+      for (const m of muts) {
+        if (m.attributeName === 'data-theme') pick();
+        if (m.attributeName === 'data-motion') { const was = running; running = !motionOff() && !document.hidden; if (running && !was) frame(); }
+      }
+    });
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-motion'] });
     resize();
 
-    const frame = () => { if (!running) return; active.frame(); raf = requestAnimationFrame(frame); };
     if (reduce) { for (let s = 0; s < 300; s++) active.frame(); }
     else {
       document.addEventListener('visibilitychange', onVis);
-      frame();
+      if (running) frame(); else active.frame();
     }
 
     // Teardown so re-init on navigation doesn't stack loops/listeners.
