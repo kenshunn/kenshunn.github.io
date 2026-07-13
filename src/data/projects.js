@@ -9,6 +9,7 @@ const projects = [
     liveUrl: '',
     image: '/images/cedo-seal.webp',
     featured: true,
+    meta: { role: 'Full-stack Developer', focus: 'Voucher management system', output: 'PDF vouchers, bulk import, audit logs' },
     gallery: [
       { src: '/images/cedo/1.webp', caption: 'Sign-in page — authorized-account login for the Grants & Scholarships Program.' },
       { src: '/images/cedo/2.webp', caption: 'Dashboard — student count, vouchers printed, and recent student records.' },
@@ -31,6 +32,7 @@ const projects = [
     liveUrl: '',
     image: '/images/binan.webp',
     featured: true,
+    meta: { role: 'Web Developer Intern', focus: 'Access-card / ID management', output: 'Card issuance & citizen records' },
   },
   {
     title: 'Clock In',

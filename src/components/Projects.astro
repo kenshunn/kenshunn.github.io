@@ -23,12 +23,21 @@ const projJson = (p) =>
   </div>
 
   {featured.length > 0 && (
-    <div class="featured-grid">
+    <div class="featured-rows">
       {featured.map((p) => (
-        <article class="card featured-project project-open" role="button" tabindex="0" data-project={projJson(p)}>
-          <span class="featured-badge">★ Featured</span>
-          <img class="featured-img" src={p.image} alt={p.title} draggable="false" width="500" height="200" loading="lazy" />
+        <article class="featured-row">
+          <div class="featured-media project-open" role="button" tabindex="0" data-project={projJson(p)}>
+            <span class="featured-badge">★ Featured</span>
+            <img class="featured-img" src={p.image} alt={p.title} draggable="false" width="520" height="300" loading="lazy" />
+          </div>
           <div class="featured-body">
+            {p.meta && (
+              <dl class="featured-meta">
+                <div><dt>Role</dt><dd>{p.meta.role}</dd></div>
+                <div><dt>Focus</dt><dd>{p.meta.focus}</dd></div>
+                <div><dt>Output</dt><dd>{p.meta.output}</dd></div>
+              </dl>
+            )}
             <h3>{p.title}</h3>
             <p class="project-desc">{p.description}</p>
             <ul class="tags">
@@ -89,17 +98,40 @@ const projJson = (p) =>
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
 
-  /* Featured projects — static side-by-side (stacks on mobile) */
-  .featured-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
-  .featured-project { position: relative; display: flex; flex-direction: column; }
-  .featured-img { width: 100%; height: 200px; object-fit: contain; padding: 1rem; border-radius: var(--r-card); background: var(--bg); border: 1px solid var(--hair); margin-bottom: 1rem; }
+  /* Featured projects — full-width alternating image/text rows */
+  .featured-rows { display: flex; flex-direction: column; gap: 4rem; margin-bottom: 5rem; }
+  .featured-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; }
+  .featured-row:nth-child(even) .featured-media { order: 2; }
+  .featured-media {
+    position: relative; cursor: pointer;
+    border: 1px solid var(--hair); border-radius: var(--r-card);
+    background: var(--bg); overflow: hidden;
+    transition: border-color 150ms ease;
+  }
+  .featured-media:hover { border-color: var(--accent); }
+  .featured-media:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .featured-img { width: 100%; height: 300px; object-fit: contain; padding: 1.5rem; display: block; }
   .featured-body { display: flex; flex-direction: column; align-items: flex-start; }
-  .featured-body .project-links { margin-top: 1rem; justify-content: flex-start; }
-  @media (max-width: 640px) { .featured-grid { grid-template-columns: 1fr; } }
+  .featured-body h3 { font-size: 1.5rem; margin: 0.6rem 0 0.5rem; }
+  .featured-body .project-links { margin-top: 1.25rem; justify-content: flex-start; }
+  .featured-meta {
+    display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem;
+    font-family: var(--font-mono); font-size: 0.72rem; margin: 0;
+    text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .featured-meta div { display: flex; gap: 0.4rem; }
+  .featured-meta dt { color: var(--muted); margin: 0; }
+  .featured-meta dd { color: var(--text); margin: 0; }
+  @media (max-width: 640px) {
+    .featured-rows { gap: 2.5rem; margin-bottom: 3rem; }
+    .featured-row { grid-template-columns: 1fr; gap: 1.25rem; }
+    .featured-row:nth-child(even) .featured-media { order: 0; }
+    .featured-img { height: 200px; }
+  }
   .featured-badge {
     position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2;
     padding: 0.2rem 0.5rem; border-radius: var(--r-tag);
-    background: var(--accent); color: #fff;
+    background: var(--accent); color: #fff; font-family: var(--font-mono); font-size: 0.68rem;
   }
   .carousel-btn {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
