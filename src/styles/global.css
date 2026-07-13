@@ -46,8 +46,24 @@ a:hover { text-decoration: underline; }
 section { max-width: var(--maxw); margin: 0 auto; padding: 96px 24px; }
 .coursework { max-width: var(--maxw); margin: 0 auto; padding: 0 24px 96px; }
 
+/* Section head with an optional grid-toggle button (used by About/Projects/Coursework).
+   Global so it styles every page, not just the one that renders Projects. */
+.projects-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.projects-grid-toggle {
+  flex: none; margin-top: 0.4rem;
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: var(--r-card);
+  background: var(--surface); color: var(--muted); border: 1px solid var(--hair);
+  cursor: pointer; transition: color 150ms ease, border-color 150ms ease;
+}
+.projects-grid-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
 h1, h2, h3, h4 { font-family: var(--font-sans); font-weight: 700; line-height: 1.2; }
 h2 { font-size: 2rem; margin-bottom: 1.5rem; }
+
+/* Vertical rhythm inside multi-block sections (e.g. About: bio / Education / Certs) */
+.eyebrow { margin-bottom: 0.5rem; }
+.eyebrow:not(:first-child) { margin-top: 3.5rem; }
 
 /* Monospace for labels / tags / dates */
 .eyebrow, .tags li, .tl-meta, .skill-group-hint, .cert-issuer, .featured-badge {

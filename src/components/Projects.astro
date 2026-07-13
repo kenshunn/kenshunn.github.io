@@ -84,17 +84,8 @@ const projJson = (p) =>
 </section>
 
 <style is:global>
-  .projects-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
   .project-open { cursor: pointer; }
   .project-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  .projects-grid-toggle {
-    flex: none; margin-top: 0.4rem;
-    display: flex; align-items: center; justify-content: center;
-    width: 44px; height: 44px; border-radius: var(--r-card);
-    background: var(--surface); color: var(--muted); border: 1px solid var(--hair);
-    cursor: pointer; transition: color 150ms ease, border-color 150ms ease;
-  }
-  .projects-grid-toggle:hover { color: var(--accent); border-color: var(--accent); }
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
 
