@@ -281,7 +281,7 @@ body:has(.hero) .hero { padding-top: 0; padding-bottom: 0; min-height: 100vh; }
 #cursor.cursor-on { opacity: 1; }
 .cursor-dot, .cursor-ring { position: absolute; top: 0; left: 0; border-radius: 50%; will-change: transform; }
 .cursor-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #fff; }
-.cursor-ring { width: 34px; height: 34px; margin: -17px 0 0 -17px; border: 1px solid #fff; transition: width 180ms ease, height 180ms ease, margin 180ms ease, background-color 180ms ease; }
+.cursor-ring { display: none; }
 #cursor.cursor-hover .cursor-ring { width: 52px; height: 52px; margin: -26px 0 0 -26px; background: rgba(255,255,255,0.12); }
 #cursor.cursor-press .cursor-ring { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
 html.has-custom-cursor,
