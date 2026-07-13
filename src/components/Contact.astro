@@ -4,61 +4,43 @@
   <p class="eyebrow">Get in touch</p>
   <h2>Contact Me</h2>
   <form class="contact-form" method="POST" novalidate>
-    <div class="contact-fields">
-      <input name="name" type="text" placeholder="Your name" aria-label="Name" />
-      <input name="email" type="email" placeholder="Your email" aria-label="Email" />
-      <textarea name="message" rows="5" placeholder="Your message" aria-label="Message"></textarea>
-      <p class="form-error" role="alert"></p>
+    <input name="name" type="text" placeholder="Your name" aria-label="Name" />
+    <input name="email" type="email" placeholder="Your email" aria-label="Email" />
+    <textarea name="message" rows="5" placeholder="Your message" aria-label="Message"></textarea>
+    <p class="form-error" role="alert"></p>
+    <button type="submit" class="btn btn-primary">Send</button>
+    <p class="form-ok" role="status"></p>
+    <div class="contact-fallback">
+      <a href="mailto:aaron.11demartin@gmail.com">aaron.11demartin@gmail.com</a>
+      <span>+63 998 545 1812</span>
     </div>
-    <aside class="contact-side">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-
-      <div></div>
-      <div></div>
-      <div></div>
-      <button type="submit" class="btn btn-primary">Send</button>
-      <p class="form-ok" role="status"></p>
-      <div class="contact-fallback">
-        <a href="mailto:aaron.11demartin@gmail.com">aaron.11demartin@gmail.com</a>
-        <span>+63 998 545 1812</span>
-      </div>
-    </aside>
-    <div>    </div>
-    <div>    </div>
   </form>
 </section>
 
 <style is:global>
-  /* Inputs on the left, Send + contact details on the right */
   .contact { text-align: center; }
   .contact-form {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2.5rem;
-    align-items: start;
-    max-width: 900px;
-    margin: 2.5rem auto 0;
+    display: flex; flex-direction: column; gap: 1rem;
+    width: 100%; max-width: 520px; margin: 2.5rem auto 0;
     text-align: left;
   }
-  .contact-fields { display: flex; flex-direction: column; gap: 1.25rem; }
-  .contact-fields input,
-  .contact-fields textarea { padding: 1rem 1.1rem; font-size: 1.05rem; }
-  .contact-side { display: flex; flex-direction: column; gap: 0.9rem; }
-  .contact-side .btn { width: 100%; padding: 1rem; font-size: 1.05rem; }
-  .contact-side .contact-fallback { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .contact-form input,
+  .contact-form textarea {
+    width: 100%; padding: 0.95rem 1.1rem; font-size: 1rem;
+  }
+  .contact-form textarea { resize: vertical; min-height: 140px; }
+  .contact-form .btn { width: 100%; padding: 0.95rem; font-size: 1.02rem; margin-top: 0.25rem; }
+  .form-error { min-height: 0; }
   .form-ok { color: var(--accent); font-family: var(--font-mono); font-size: 0.85rem; margin: 0; }
   .form-ok:empty { display: none; }
+  .contact-fallback {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 1.25rem;
+    margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--hair);
+    color: var(--muted); font-size: 0.95rem;
+  }
   @media (max-width: 640px) {
     .contact { text-align: left; }
-    .contact-form { grid-template-columns: 1fr; gap: 1rem; }
+    .contact-fallback { justify-content: flex-start; }
   }
 </style>
 
