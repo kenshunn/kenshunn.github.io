@@ -1,5 +1,6 @@
 ---
 import certifications from '../data/certifications.js';
+import seminars from '../data/seminars.js';
 const primary = certifications.filter((c) => c.issuer !== 'Google Cloud');
 const GC_PROFILE = 'https://www.skills.google/public_profiles/c6214554-2530-4cdb-a3da-8cb58d22236c';
 
@@ -17,8 +18,8 @@ const education = [
     full-stack web and mobile applications. I ship systems end to end: a
     voucher-management platform on CodeIgniter 4, an ASP.NET mental-health app,
     and a Kotlin attendance app with BLE proximity and MFA. Comfortable across
-    PHP, C#, Kotlin, Python, and JavaScript — from database schema to UI — with a
-    networking foundation from my CCNA. Aiming for a Junior Software Developer role.
+    PHP, C#, Kotlin, Python, and JavaScript — from database schema to UI — backed
+    by a CompTIA Tech+ certification. Aiming for a Junior Software Developer role.
   </p>
 
   <p class="eyebrow">Where I studied</p>
@@ -72,6 +73,27 @@ const education = [
       </div>
     </article>
   </div>
+
+  {seminars.length > 0 && (
+    <>
+      <p class="eyebrow">Also attended</p>
+      <h2>Seminars</h2>
+      <div class="cert-grid">
+        {seminars.map((s) => (
+          <article class="card cert-card">
+            <span class="cert-issuer">{s.org}</span>
+            <h4>{s.title}</h4>
+            {s.date && <p class="gc-desc">{s.date}</p>}
+            {s.url && (
+              <div class="project-links">
+                <a class="btn btn-outline" href={s.url} target="_blank" rel="noreferrer">View certificate</a>
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
+    </>
+  )}
 </section>
 
 <style is:global>
