@@ -1,39 +1,29 @@
-// GSAP staggered-block page transition, driven through Astro's view-transition
-// loader so the DOM swap waits until the cover fully closes.
+// GSAP staggered-block page transition. We intercept internal link clicks,
+// play the cover, then call Astro's navigate() ourselves — reliable control of
+// the sequence without hooking the view-transition loader:
 //
 //   click -> cover slides in (direction = nav order) -> label shows once fully
-//   covered -> short hold -> Astro swaps the page underneath (hidden) -> cover
-//   slides out the same direction, revealing the new page.
-//
-// While a transition runs the block layer captures pointer events, so rapid
-// repeat-clicks can't queue up overlapping navigations (which stranded tweens).
+//   covered -> short hold -> navigate() swaps the page (hidden behind cover) ->
+//   cover slides out, revealing the new page.
 import gsap from 'gsap';
+import { navigate } from 'astro:transitions/client';
 
 const LABELS = {
-  '/': 'Home',
-  '/about': 'About Me',
-  '/experience': 'Experience',
-  '/skills': 'Skills',
-  '/projects': 'Projects',
-  '/garden': 'Garden',
-  '/contact': 'Contact',
+  '/': 'Home', '/about': 'About Me', '/experience': 'Experience', '/skills': 'Skills',
+  '/projects': 'Projects', '/garden': 'Garden', '/contact': 'Contact',
 };
-// Nav order — moving to a later page sweeps left->right, earlier page right->left.
+// Nav order — a later page sweeps left->right, an earlier page right->left.
 const ORDER = { '/': 0, '/about': 1, '/experience': 2, '/skills': 3, '/projects': 4, '/garden': 5, '/contact': 6 };
 const norm = (p) => (p || '/').replace(/\/$/, '') || '/';
 
 if (!window.__gsapTransitions) {
   window.__gsapTransitions = true;
-  const blocks = () => document.getElementById('page-blocks');
   const rows = () => gsap.utils.toArray('#page-blocks .pb-row');
   const label = () => document.querySelector('#page-blocks .pb-label');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const DUR = 0.7, STAG = 0.1, HOLD = 0.9; // seconds
-  let dir = 1;       // +1 forward (L->R), -1 backward (R->L)
-  let busy = false, failsafe = 0;
-  const gate = (on) => { const b = blocks(); if (b) b.style.pointerEvents = on ? 'auto' : 'none'; };
-  const release = () => { busy = false; gate(false); clearTimeout(failsafe); };
+  const DUR = 0.6, STAG = 0.09, HOLD = 0.7; // seconds
+  let dir = 1, busy = false;
   const waitMs = (ms) => new Promise((res) => setTimeout(res, ms));
 
   const coverIn = (toPath) => new Promise((resolve) => {
@@ -44,46 +34,49 @@ if (!window.__gsapTransitions) {
     const lb = label();
     if (lb) { lb.textContent = LABELS[toPath] || ''; gsap.set(lb, { autoAlpha: 0, y: 12 }); }
     const tl = gsap.timeline({ onComplete: resolve });
-    tl.to(r, { xPercent: 0, duration: DUR, ease: 'power4.inOut', stagger: STAG });
-    if (lb) tl.to(lb, { autoAlpha: 1, y: 0, duration: 0.35, ease: 'power2.out' }); // only after fully covered
+    tl.to(r, { xPercent: 0, duration: DUR, ease: 'power3.inOut', stagger: STAG });
+    if (lb) tl.to(lb, { autoAlpha: 1, y: 0, duration: 0.3, ease: 'power2.out' }); // only once fully covered
   });
 
-  const revealOut = () => {
+  const revealOut = () => new Promise((resolve) => {
     const r = rows();
-    if (!r.length) { release(); return; }
+    if (!r.length) { resolve(); return; }
     const lb = label();
-    if (lb) gsap.to(lb, { autoAlpha: 0, duration: 0.25, ease: 'power1.out' });
+    if (lb) gsap.to(lb, { autoAlpha: 0, duration: 0.2, ease: 'power1.out' });
     gsap.killTweensOf(r);
-    gsap.to(r, {
-      xPercent: 101 * dir, duration: DUR, ease: 'power4.inOut', stagger: STAG,
-      onComplete: release,
-    });
-  };
+    gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power3.inOut', stagger: STAG, onComplete: resolve });
+  });
 
-  if (!reduce) {
-    document.addEventListener('astro:before-preparation', (event) => {
-      const toPath = norm(event.to ? event.to.pathname : location.pathname);
-      const fromPath = norm(event.from ? event.from.pathname : location.pathname);
-      const ti = ORDER[toPath] ?? 0, fi = ORDER[fromPath] ?? 0;
-      dir = ti >= fi ? 1 : -1;
-      busy = true;
-      gate(true); // block further clicks immediately
-      clearTimeout(failsafe);
-      failsafe = setTimeout(release, 7000); // never leave the click-gate stuck
+  async function go(pathname) {
+    if (busy) return;
+    busy = true;
+    const toPath = norm(pathname), fromPath = norm(location.pathname);
+    dir = (ORDER[toPath] ?? 0) >= (ORDER[fromPath] ?? 0) ? 1 : -1;
+    await coverIn(toPath);
+    await waitMs(HOLD * 1000);
+    try { await navigate(pathname); } catch (e) { location.href = pathname; return; }
+    // page-load fires after the swap; give it a tick, then uncover
+    await waitMs(60);
+    await revealOut();
+    busy = false;
+  }
 
-      const original = event.loader;
-      if (typeof original === 'function') {
-        event.loader = async () => {
-          await coverIn(toPath);   // fully cover + show label
-          await waitMs(HOLD * 1000);
-          await original();        // load + swap the page underneath (hidden)
-        };
-      }
-    });
+  if (reduce) {
+    // no animation — let the browser navigate normally
+  } else {
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      const url = new URL(a.getAttribute('href'), location.href);
+      if (url.origin !== location.origin) return;                 // external
+      if (a.target === '_blank' || a.hasAttribute('download')) return;
+      if (url.pathname === location.pathname) return;             // same page / hash
+      e.preventDefault();
+      go(url.pathname + url.search);
+    }, true);
 
-    document.addEventListener('astro:page-load', () => {
-      if (busy) revealOut();
-      else gsap.set(rows(), { xPercent: -101 }); // direct/first load: park off-screen
-    });
+    // keep the block layer parked off-screen after a plain (non-animated) load
+    document.addEventListener('astro:page-load', () => { if (!busy) gsap.set(rows(), { xPercent: -101 }); });
   }
 }
