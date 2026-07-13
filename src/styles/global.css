@@ -36,6 +36,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding-bottom: 96px; /* clear the floating dock */
 }
 body > main { flex: 1 0 auto; }
 a { color: var(--accent); text-decoration: none; }
@@ -84,50 +85,56 @@ h2 { font-size: 2rem; margin-bottom: 1.5rem; }
 }
 .tags li:hover { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
 
-/* Navbar */
-.navbar {
-  position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.9rem 24px;
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--hair);
+/* Dock nav — floating pill at bottom, macOS-style tiles + tooltip labels */
+.dock {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  z-index: 50; max-width: calc(100vw - 24px);
 }
-.nav-left { display: flex; align-items: center; gap: 1rem; }
-.nav-back {
-  display: inline-flex; align-items: center; gap: 0.35rem;
-  font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em;
-  color: var(--muted); padding: 0.35rem 0.6rem; border: 1px solid var(--hair); border-radius: var(--r-tag);
-  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+.dock-items {
+  display: flex; align-items: flex-end; gap: 6px; list-style: none; margin: 0;
+  padding: 8px; border-radius: 20px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--hair);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
 }
-.nav-back:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-tint); text-decoration: none; }
-.logo { font-size: 1.35rem; font-weight: 700; color: var(--text); }
-.nav-links { display: flex; gap: 1.75rem; list-style: none; }
-.nav-links a { font-size: 0.95rem; letter-spacing: 0.01em; transition: color 150ms ease; }
-.nav-links a { color: var(--text); }
-.nav-links a:hover { color: var(--accent); text-decoration: none; }
-.nav-links a.active, .mobile-menu a.active { color: var(--accent); }
-.nav-right { display: flex; align-items: center; gap: 1rem; }
-.theme-switch {
-  position: relative; width: 58px; height: 28px; flex: none;
-  border-radius: 999px; padding: 0; cursor: pointer;
-  background: var(--surface); border: 1px solid var(--hair);
+.dock-sep { width: 1px; align-self: stretch; margin: 4px 2px; background: var(--hair); }
+.dock-item {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; flex: none; padding: 0;
+  border: 1px solid transparent; border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent); color: var(--muted);
+  cursor: pointer; transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
-.theme-switch .ico-sun, .theme-switch .ico-moon {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  width: 15px; height: 15px; color: var(--muted);
+.dock-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dock-item:hover { color: var(--accent); background: var(--accent-tint); border-color: var(--accent); transform: translateY(-8px) scale(1.12); text-decoration: none; }
+.dock-item:active { transform: translateY(-4px) scale(1.05); }
+.dock-item.active { color: var(--accent); background: var(--accent-tint); border-color: var(--accent); }
+.dock-item.active::after {
+  content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: var(--accent);
 }
-.theme-switch .ico-sun { left: 7px; }
-.theme-switch .ico-moon { right: 7px; }
-.theme-switch .knob {
-  position: absolute; top: 2px; left: 2px; width: 22px; height: 22px;
-  border-radius: 50%; background: var(--accent);
-  transition: transform 150ms ease;
+/* Tooltip label above tile on hover (like the reference dock) */
+.dock-item::before {
+  content: attr(data-label); position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(4px);
+  padding: 0.25rem 0.55rem; border-radius: var(--r-tag); white-space: nowrap;
+  font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.02em;
+  background: var(--text); color: var(--bg);
+  opacity: 0; pointer-events: none; transition: opacity 150ms ease, transform 150ms ease;
 }
-[data-theme='dark'] .theme-switch .knob { transform: translateX(30px); }
-.hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
-.hamburger span { width: 26px; height: 2px; background: var(--text); }
-.mobile-menu { display: none; list-style: none; }
+.dock-item:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* Theme icons inside the dock */
+.dock-item .ico-sun, .dock-item .ico-moon { position: absolute; }
+[data-theme='dark'] .dock-item .ico-sun { display: block; }
+[data-theme='dark'] .dock-item .ico-moon { display: none; }
+[data-theme='light'] .dock-item .ico-sun { display: none; }
+[data-theme='light'] .dock-item .ico-moon { display: block; }
+@media (max-width: 640px) {
+  .dock { bottom: 12px; }
+  .dock-items { gap: 4px; padding: 6px; overflow-x: auto; }
+  .dock-item { width: 40px; height: 40px; }
+  .dock-item svg { width: 20px; height: 20px; }
+}
 
 /* Hero */
 .tagline { color: var(--accent); font-size: 1.2rem; margin: 0.25rem 0 1.25rem; }
@@ -240,15 +247,6 @@ html.has-custom-cursor textarea { cursor: none; }
   section { padding: 56px 20px; }
   .coursework { padding: 0 20px 56px; }
   h2 { font-size: 1.7rem; }
-  .desktop-only { display: none; }
-  .hamburger { display: flex; }
-  .mobile-menu {
-    position: absolute; top: 100%; right: 0; flex-direction: column;
-    background: var(--surface); border: 1px solid var(--hair);
-    max-height: 0; overflow: hidden; transition: max-height 200ms ease; width: 100%; text-align: center;
-  }
-  .mobile-menu.open { max-height: 320px; }
-  .mobile-menu li { padding: 0.8rem 0; }
   .hero { flex-direction: column; text-align: center; gap: 2rem; }
   .hero-text { text-align: center; }
   .hero-btns, .socials { justify-content: center; }
