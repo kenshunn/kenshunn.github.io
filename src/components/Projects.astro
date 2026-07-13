@@ -55,29 +55,23 @@ const projJson = (p) =>
     </div>
   )}
 
-  <div class="project-carousel">
-    <button type="button" class="carousel-btn prev" aria-label="Previous projects">&#8249;</button>
-    <div class="project-viewport">
-      <div class="project-track">
-        {rest.map((p) => (
-          <article class="card project-card project-open" role="button" tabindex="0" data-project={projJson(p)}>
-            <img class="project-img" src={p.image} alt={p.title} draggable="false" width="320" height="160" loading="lazy" />
-            <h3>{p.title}</h3>
-            <p class="project-desc">{p.description}</p>
-            <ul class="tags">
-              {p.tags.map((t) => <li>{t}</li>)}
-            </ul>
-            <div class="project-links">
-              {p.liveUrl && (
-                <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
-              )}
-              <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-    <button type="button" class="carousel-btn next" aria-label="Next projects">&#8250;</button>
+  <div class="project-grid">
+    {rest.map((p) => (
+      <article class="card project-card project-open" role="button" tabindex="0" data-project={projJson(p)}>
+        <img class="project-img" src={p.image} alt={p.title} draggable="false" width="320" height="160" loading="lazy" />
+        <h3>{p.title}</h3>
+        <p class="project-desc">{p.description}</p>
+        <ul class="tags">
+          {p.tags.map((t) => <li>{t}</li>)}
+        </ul>
+        <div class="project-links">
+          {p.liveUrl && (
+            <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
+          )}
+          <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
+        </div>
+      </article>
+    ))}
   </div>
 
   <Coursework />
@@ -86,6 +80,12 @@ const projJson = (p) =>
 <style is:global>
   .project-open { cursor: pointer; }
   .project-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* Secondary projects — responsive grid (replaces the carousel) */
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 0.5rem; }
+  .project-grid .project-card { width: auto; flex: initial; display: flex; flex-direction: column; height: 100%; }
+  .project-grid .project-card .project-links { margin-top: auto; }
+  @media (max-width: 640px) { .project-grid { grid-template-columns: 1fr; } }
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
 
