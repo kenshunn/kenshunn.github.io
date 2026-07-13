@@ -139,12 +139,29 @@ h2 { font-size: 2rem; margin-bottom: 1.5rem; }
   opacity: 0; pointer-events: none; transition: opacity 150ms ease, transform 150ms ease;
 }
 .dock-item:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
-/* Theme icons inside the dock */
-.dock-item .ico-sun, .dock-item .ico-moon { position: absolute; }
-[data-theme='dark'] .dock-item .ico-sun { display: block; }
-[data-theme='dark'] .dock-item .ico-moon { display: none; }
-[data-theme='light'] .dock-item .ico-sun { display: none; }
-[data-theme='light'] .dock-item .ico-moon { display: block; }
+/* Theme icon swap (shared by the top pill) */
+[data-theme='dark'] .ico-sun { display: block; }
+[data-theme='dark'] .ico-moon { display: none; }
+[data-theme='light'] .ico-sun { display: none; }
+[data-theme='light'] .ico-moon { display: block; }
+
+/* Top-center status pill — theme toggle + current page label (yevtam-style) */
+.topbar {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 60;
+  display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0.7rem;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--hair); border-radius: 999px;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.topbar-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; padding: 0; background: none; border: none;
+  color: var(--muted); cursor: pointer; transition: color 150ms ease;
+}
+.topbar-btn:hover { color: var(--accent); }
+.topbar-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.topbar-sep { width: 1px; height: 16px; background: var(--hair); }
+.topbar-label { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); text-transform: lowercase; letter-spacing: 0.02em; }
 @media (max-width: 640px) {
   .dock { bottom: 12px; }
   .dock-items { gap: 4px; padding: 6px; overflow-x: auto; }
@@ -153,11 +170,16 @@ h2 { font-size: 2rem; margin-bottom: 1.5rem; }
 }
 
 /* Hero */
-.tagline { color: var(--accent); font-size: 1.2rem; margin: 0.25rem 0 1.25rem; }
-.hero { display: flex; align-items: center; gap: 3rem; }
-.hero-pic { width: 300px; height: 300px; object-fit: cover; border-radius: 50%; border: 1px solid var(--hair); }
-.hero-text { text-align: left; }
-.hero-btns { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+/* Hero — centered editorial column (name small, tagline is the headline) */
+.hero {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 1.5rem; min-height: calc(100vh - 220px);
+}
+.hero-pic { width: 190px; height: 190px; object-fit: cover; border-radius: 50%; border: 1px solid var(--hair); }
+.hero-text { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+.hero h1 { font-size: 1.05rem; font-weight: 600; color: var(--text); letter-spacing: 0.01em; }
+.tagline { color: var(--text); font-weight: 700; font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1.08; margin: 0; max-width: 16ch; }
+.hero-btns { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 0.25rem; }
 .socials { display: flex; gap: 1.25rem; }
 .socials a { display: inline-flex; color: var(--muted); transition: color 150ms ease; }
 .socials a:hover { color: var(--accent); }
@@ -257,10 +279,8 @@ html.has-custom-cursor textarea { cursor: none; }
   section { padding: 56px 20px; }
   .coursework { padding: 0 20px 56px; }
   h2 { font-size: 1.7rem; }
-  .hero { flex-direction: column; text-align: center; gap: 2rem; }
-  .hero-text { text-align: center; }
-  .hero-btns, .socials { justify-content: center; }
-  .hero-pic { width: 220px; height: 220px; }
+  .hero { gap: 1.25rem; min-height: calc(100vh - 180px); }
+  .hero-pic { width: 150px; height: 150px; }
   .about-grid, .skills-groups { grid-template-columns: 1fr; }
   .project-card { flex-basis: 82vw; }
   .course-card { flex-basis: 78vw; }

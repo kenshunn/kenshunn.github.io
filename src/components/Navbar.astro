@@ -10,7 +10,17 @@ const links = [
 ];
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isActive = (href) => path === href;
+const currentLabel = (links.find((l) => isActive(l.href))?.label || 'Home').toLowerCase();
 ---
+
+<div class="topbar" aria-label="Status">
+  <button type="button" id="theme-toggle" class="topbar-btn" role="switch" aria-label="Toggle color theme">
+    <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+    <svg class="ico-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path></svg>
+  </button>
+  <span class="topbar-sep" aria-hidden="true"></span>
+  <span class="topbar-label">{currentLabel}</span>
+</div>
 
 <nav class="dock" aria-label="Primary">
   <ul class="dock-items">
@@ -33,13 +43,6 @@ const isActive = (href) => path === href;
         </a>
       </li>
     ))}
-    <li class="dock-sep" aria-hidden="true"></li>
-    <li>
-      <button type="button" id="theme-toggle" class="dock-item" data-label="Theme" role="switch" aria-label="Toggle color theme">
-        <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
-        <svg class="ico-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path></svg>
-      </button>
-    </li>
   </ul>
 </nav>
 
