@@ -25,18 +25,16 @@ const { title = 'Ken Aaron De Martin — Portfolio' } = Astro.props;
     <ViewTransitions />
     <script is:inline>
       (function () {
-        function applyPrefs() {
+        function applyTheme() {
           try {
             document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-            document.documentElement.setAttribute('data-motion', localStorage.getItem('motion') || 'on');
           } catch (e) {
             document.documentElement.setAttribute('data-theme', 'dark');
-            document.documentElement.setAttribute('data-motion', 'on');
           }
         }
-        applyPrefs();
+        applyTheme();
         // Re-apply after each view-transition swap (new page hardcodes a default).
-        document.addEventListener('astro:after-swap', applyPrefs);
+        document.addEventListener('astro:after-swap', applyTheme);
       })();
     </script>
     <noscript>
