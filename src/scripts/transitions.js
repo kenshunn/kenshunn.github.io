@@ -51,6 +51,7 @@ if (!window.__gsapTransitions) {
     gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power3.inOut', stagger: STAG, onComplete: resolve });
   });
 
+  // Phase 1 (on click): cover the screen, show the label, then trigger the swap.
   async function go(pathname) {
     if (busy) return;
     busy = true;
@@ -58,16 +59,19 @@ if (!window.__gsapTransitions) {
     dir = (ORDER[toPath] ?? 0) >= (ORDER[fromPath] ?? 0) ? 1 : -1;
     await coverIn();          // blocks slide in to fully cover
     showLabel(toPath);        // label appears only now (fully covered)
-    try { await navigate(pathname); } catch (e) { location.href = pathname; return; } // swap under cover
+    navigate(pathname).catch(() => { location.href = pathname; }); // swap under cover
+  }
+
+  // Phase 2 (after the swap lands): hold covered, then uncover + fade the label.
+  async function onLoaded() {
+    if (!busy) { gsap.set(rows(), { xPercent: -101 }); return; } // direct/first load: park off-screen
     await waitMs(HOLD * 1000); // hold — covered, label visible, new page ready underneath
     hideLabel();              // fade label out...
     await revealOut();        // ...as the cover slides off together
     busy = false;
   }
 
-  if (reduce) {
-    // no animation — let the browser navigate normally
-  } else {
+  if (!reduce) {
     document.addEventListener('click', (e) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = e.target.closest && e.target.closest('a[href]');
@@ -80,7 +84,6 @@ if (!window.__gsapTransitions) {
       go(url.pathname + url.search);
     }, true);
 
-    // keep the block layer parked off-screen after a plain (non-animated) load
-    document.addEventListener('astro:page-load', () => { if (!busy) gsap.set(rows(), { xPercent: -101 }); });
+    document.addEventListener('astro:page-load', onLoaded);
   }
 }
