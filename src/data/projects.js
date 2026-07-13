@@ -9,6 +9,18 @@ const projects = [
     liveUrl: '',
     image: 'https://raw.githubusercontent.com/jgtrea/FinancialAssistanceProgram_G2/main/public/assets/img/city_education_office_seal.png',
     featured: true,
+    gallery: [
+      { src: '/images/cedo/1.png', caption: 'Sign-in page — authorized-account login for the Grants & Scholarships Program.' },
+      { src: '/images/cedo/2.png', caption: 'Dashboard — student count, vouchers printed, and recent student records.' },
+      { src: '/images/cedo/3.png', caption: 'Students — manage records with search, filters, bulk import, and add.' },
+      { src: '/images/cedo/4.png', caption: 'Schools — manage junior and senior high school data (import/export).' },
+      { src: '/images/cedo/5.png', caption: 'Signatories — manage voucher signatories and their signatures.' },
+      { src: '/images/cedo/6.png', caption: 'Archive — archive and export student records by school year.' },
+      { src: '/images/cedo/7.png', caption: 'Vouchers — generate, print, and export student vouchers.' },
+      { src: '/images/cedo/8.png', caption: 'User Management — staff accounts, roles, and system access.' },
+      { src: '/images/cedo/9.png', caption: 'Other Options — custom dropdowns for suffix, prefix, and degree fields.' },
+      { src: '/images/cedo/10.png', caption: 'Audit Logs — track account activity and voucher changes.' },
+    ],
   },
   {
     title: 'Biñan Access Card',
