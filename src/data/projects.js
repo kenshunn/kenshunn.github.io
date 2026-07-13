@@ -9,7 +9,7 @@ const projects = [
     liveUrl: '',
     image: '/images/cedo-seal.webp',
     featured: true,
-    meta: { role: 'Full-stack Developer', focus: 'Voucher management system', output: 'PDF vouchers, bulk import, audit logs' },
+    meta: { role: 'Full-stack Web Developer Intern', focus: 'Voucher management system', output: 'PDF vouchers, bulk import, audit logs' },
     gallery: [
       { src: '/images/cedo/1.webp', caption: 'Sign-in page — authorized-account login for the Grants & Scholarships Program.' },
       { src: '/images/cedo/2.webp', caption: 'Dashboard — student count, vouchers printed, and recent student records.' },
@@ -22,17 +22,6 @@ const projects = [
       { src: '/images/cedo/9.webp', caption: 'Other Options — custom dropdowns for suffix, prefix, and degree fields.' },
       { src: '/images/cedo/10.webp', caption: 'Audit Logs — track account activity and voucher changes.' },
     ],
-  },
-  {
-    title: 'Biñan Access Card',
-    description:
-      'An access-card / ID management system for the City Government of Biñan — built during my web developer internship.',
-    tags: ['PHP', 'MySQL', 'JavaScript'],
-    repoUrl: 'https://github.com/daki-crypto/binan_accesscard',
-    liveUrl: '',
-    image: '/images/binan.webp',
-    featured: true,
-    meta: { role: 'Web Developer Intern', focus: 'Access-card / ID management', output: 'Card issuance & citizen records' },
   },
   {
     title: 'Clock In',
