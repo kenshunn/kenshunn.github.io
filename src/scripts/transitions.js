@@ -58,11 +58,10 @@ if (!window.__gsapTransitions) {
     dir = (ORDER[toPath] ?? 0) >= (ORDER[fromPath] ?? 0) ? 1 : -1;
     await coverIn();          // blocks slide in to fully cover
     showLabel(toPath);        // label appears only now (fully covered)
-    await waitMs(HOLD * 1000); // pause — label visible during this hold
-    hideLabel();
-    try { await navigate(pathname); } catch (e) { location.href = pathname; return; }
-    await waitMs(60);         // let the swap settle
-    await revealOut();        // blocks slide off, revealing the new page
+    try { await navigate(pathname); } catch (e) { location.href = pathname; return; } // swap under cover
+    await waitMs(HOLD * 1000); // hold — covered, label visible, new page ready underneath
+    hideLabel();              // fade label out...
+    await revealOut();        // ...as the cover slides off together
     busy = false;
   }
 
