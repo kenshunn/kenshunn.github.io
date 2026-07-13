@@ -3,6 +3,8 @@ import projects from '../data/projects.js';
 import Coursework from './Coursework.astro';
 const featured = projects.filter((p) => p.featured);
 const rest = projects.filter((p) => !p.featured);
+const projJson = (p) =>
+  JSON.stringify({ title: p.title, description: p.longDescription || p.description, tags: p.tags, image: p.image, gallery: p.gallery || [], repoUrl: p.repoUrl, liveUrl: p.liveUrl || '' });
 ---
 <section id="projects" class="projects reveal">
   <div class="projects-head">
@@ -26,7 +28,7 @@ const rest = projects.filter((p) => !p.featured);
       <div class="project-viewport">
         <div class="project-track">
           {featured.map((p) => (
-            <article class="card project-card featured-project">
+            <article class="card project-card featured-project project-open" role="button" tabindex="0" data-project={projJson(p)}>
               <span class="featured-badge">★ Featured</span>
               <img class="featured-img" src={p.image} alt={p.title} draggable="false" />
               <div class="featured-body">
@@ -55,7 +57,7 @@ const rest = projects.filter((p) => !p.featured);
     <div class="project-viewport">
       <div class="project-track">
         {rest.map((p) => (
-          <article class="card project-card">
+          <article class="card project-card project-open" role="button" tabindex="0" data-project={projJson(p)}>
             <img class="project-img" src={p.image} alt={p.title} draggable="false" />
             <h3>{p.title}</h3>
             <p class="project-desc">{p.description}</p>
@@ -80,6 +82,8 @@ const rest = projects.filter((p) => !p.featured);
 
 <style is:global>
   .projects-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+  .project-open { cursor: pointer; }
+  .project-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .projects-grid-toggle {
     flex: none; margin-top: 0.5rem;
     display: flex; align-items: center; justify-content: center;
