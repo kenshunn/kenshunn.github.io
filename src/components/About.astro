@@ -81,8 +81,9 @@ const education = [
       <h2>Seminars</h2>
       <div class="cert-grid">
         {seminars.map((s) => (
-          <article class="card cert-card">
-            <span class="cert-issuer">{s.org}</span>
+          <article class={`card cert-card${s.featured ? ' cert-primary' : ''}`}>
+            {s.featured && <span class="cert-star">★ Featured</span>}
+            {s.org && <span class="cert-issuer">{s.org}</span>}
             <h4>{s.title}</h4>
             {s.date && <p class="gc-desc">{s.date}</p>}
             {s.url && (
