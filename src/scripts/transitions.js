@@ -49,22 +49,29 @@ if (!window.__gsapTransitions) {
     gsap.to(r, { xPercent: 0, duration: DUR, ease: 'power4.inOut', stagger: STAG });
   };
 
-  const runReveal = () => {
+  const runReveal = (didCover) => {
     const r = rows();
     if (!r.length) return;
     const lb = label();
     if (lb) gsap.to(lb, { autoAlpha: 0, duration: 0.35, ease: 'power1.out' });
     gsap.killTweensOf(r);
-    gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power4.inOut', stagger: STAG, delay: 0.1 });
+    if (didCover) {
+      // exit the cover off-screen in the sweep direction
+      gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power4.inOut', stagger: STAG, delay: 0.1 });
+    } else {
+      // direct / first load: no cover happened — keep rows parked off-screen, no sweep
+      gsap.set(r, { xPercent: -101 });
+    }
     const main = document.querySelector('body > main');
-    if (main) gsap.from(main, { autoAlpha: 0, y: 24, duration: 0.8, ease: 'power3.out', delay: 0.35, clearProps: 'opacity,visibility,transform' });
+    if (main) gsap.from(main, { autoAlpha: 0, y: 24, duration: 0.7, ease: 'power3.out', clearProps: 'opacity,visibility,transform' });
   };
 
   const reveal = () => {
+    const didCover = coverStart > 0;
     // wait for the cover sweep to finish before uncovering (hides the swap)
-    const wait = coverStart ? Math.max(0, COVER_MS - (performance.now() - coverStart)) : 0;
+    const wait = didCover ? Math.max(0, COVER_MS - (performance.now() - coverStart)) : 0;
     coverStart = 0;
-    setTimeout(runReveal, wait);
+    setTimeout(() => runReveal(didCover), wait);
   };
 
   if (!reduce) {
