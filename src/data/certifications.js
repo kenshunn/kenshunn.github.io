@@ -1,5 +1,5 @@
-// Certifications shown in the About section. featured: true gets its own row.
-// logo = simpleicons CDN url for the issuer brand.
+// Certifications shown in the About section. featured: true is highlighted.
+// logo = self-hosted issuer mark under /images/certs/.
 const G = '/images/certs/googlecloud.svg';
 const certifications = [
   { name: 'CompTIA Tech+ Certification', issuer: 'CompTIA', url: 'https://www.credly.com/badges/891d798c-3449-41d1-9f12-9208667420aa/linked_in_profile', logo: '/images/certs/comptia.svg', featured: true },

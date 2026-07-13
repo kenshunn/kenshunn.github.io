@@ -2,7 +2,7 @@ import { test, expect } from 'vitest';
 import skills from '../src/data/skills.js';
 import projects from '../src/data/projects.js';
 
-test('skills has expected groups with badge items', () => {
+test('skills has expected groups with text-tag items', () => {
   const groups = skills.map((g) => g.group);
   expect(groups).toContain('Languages');
   expect(groups).toContain('Databases');
@@ -10,7 +10,7 @@ test('skills has expected groups with badge items', () => {
     expect(Array.isArray(g.items)).toBe(true);
     g.items.forEach((s) => {
       expect(typeof s.name).toBe('string');
-      expect(typeof s.color).toBe('string'); // brand color drives the badge
+      expect(typeof s.detail).toBe('string'); // shown in the skill modal
     });
   });
 });
