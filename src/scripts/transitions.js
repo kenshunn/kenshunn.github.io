@@ -51,23 +51,29 @@ if (!window.__gsapTransitions) {
     gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power3.inOut', stagger: STAG, onComplete: resolve });
   });
 
-  // Phase 1 (on click): cover the screen, show the label, then trigger the swap.
+  // Wait for the swap to land: whichever comes first — Astro's page-load event
+  // or a timeout guard (so a missed event never leaves the cover stuck).
+  const swapped = () => new Promise((resolve) => {
+    let done = false;
+    const fin = () => { if (done) return; done = true; document.removeEventListener('astro:page-load', fin); resolve(); };
+    document.addEventListener('astro:page-load', fin, { once: true });
+    setTimeout(fin, 2500);
+  });
+
+  // cover -> label -> swap (hidden) -> hold -> uncover + fade label.
   async function go(pathname) {
     if (busy) return;
     busy = true;
     const toPath = norm(pathname), fromPath = norm(location.pathname);
     dir = (ORDER[toPath] ?? 0) >= (ORDER[fromPath] ?? 0) ? 1 : -1;
-    await coverIn();          // blocks slide in to fully cover
-    showLabel(toPath);        // label appears only now (fully covered)
-    navigate(pathname).catch(() => { location.href = pathname; }); // swap under cover
-  }
-
-  // Phase 2 (after the swap lands): hold covered, then uncover + fade the label.
-  async function onLoaded() {
-    if (!busy) { gsap.set(rows(), { xPercent: -101 }); return; } // direct/first load: park off-screen
-    await waitMs(HOLD * 1000); // hold — covered, label visible, new page ready underneath
-    hideLabel();              // fade label out...
-    await revealOut();        // ...as the cover slides off together
+    await coverIn();                 // blocks slide in to fully cover
+    showLabel(toPath);               // label appears only now (fully covered)
+    const wait = swapped();
+    navigate(pathname).catch(() => { location.href = pathname; });
+    await wait;                      // swap has landed under the cover
+    await waitMs(HOLD * 1000);       // hold — covered, label visible
+    hideLabel();                     // fade the label out...
+    await revealOut();               // ...as the cover slides off together
     busy = false;
   }
 
@@ -84,6 +90,7 @@ if (!window.__gsapTransitions) {
       go(url.pathname + url.search);
     }, true);
 
-    document.addEventListener('astro:page-load', onLoaded);
+    // Direct / first load (no active transition): keep the cover parked off-screen.
+    document.addEventListener('astro:page-load', () => { if (!busy) gsap.set(rows(), { xPercent: -101 }); });
   }
 }
