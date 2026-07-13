@@ -265,25 +265,8 @@ html.has-custom-cursor input,
 html.has-custom-cursor textarea { cursor: none; }
 @media (hover: none), (pointer: coarse) { #cursor { display: none; } }
 
-/* Page transitions — GSAP staggered-block wipe (see scripts/transitions.js).
-   Astro's default root cross-fade is disabled so only GSAP animates. */
+/* Page transitions disabled — instant swap, no root animation */
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
-
-#page-blocks {
-  position: fixed; inset: 0; z-index: 9000; pointer-events: none;
-  display: flex; flex-direction: column;
-}
-#page-blocks .pb-row {
-  flex: 1 1 0; width: 100%;
-  background: var(--text); /* contrasts the page: dark cover in light mode, light in dark */
-  transform: translateX(-101%); will-change: transform;
-}
-#page-blocks .pb-label {
-  position: absolute; inset: 0; z-index: 1;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-sans); font-weight: 700; font-size: clamp(1.6rem, 5vw, 2.6rem);
-  color: var(--bg); opacity: 0; visibility: hidden;
-}
 
 /* Single mobile breakpoint */
 @media (max-width: 640px) {
