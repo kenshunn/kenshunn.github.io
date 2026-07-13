@@ -23,32 +23,26 @@ const projJson = (p) =>
   </div>
 
   {featured.length > 0 && (
-    <div class="featured-row project-carousel">
-      {featured.length > 1 && <button type="button" class="carousel-btn prev" aria-label="Previous featured">&#8249;</button>}
-      <div class="project-viewport">
-        <div class="project-track">
-          {featured.map((p) => (
-            <article class="card project-card featured-project project-open" role="button" tabindex="0" data-project={projJson(p)}>
-              <span class="featured-badge">★ Featured</span>
-              <img class="featured-img" src={p.image} alt={p.title} draggable="false" />
-              <div class="featured-body">
-                <h3>{p.title}</h3>
-                <p class="project-desc">{p.description}</p>
-                <ul class="tags">
-                  {p.tags.map((t) => <li>{t}</li>)}
-                </ul>
-                <div class="project-links">
-                  {p.liveUrl && (
-                    <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
-                  )}
-                  <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-      {featured.length > 1 && <button type="button" class="carousel-btn next" aria-label="Next featured">&#8250;</button>}
+    <div class="featured-grid">
+      {featured.map((p) => (
+        <article class="card featured-project project-open" role="button" tabindex="0" data-project={projJson(p)}>
+          <span class="featured-badge">★ Featured</span>
+          <img class="featured-img" src={p.image} alt={p.title} draggable="false" loading="lazy" />
+          <div class="featured-body">
+            <h3>{p.title}</h3>
+            <p class="project-desc">{p.description}</p>
+            <ul class="tags">
+              {p.tags.map((t) => <li>{t}</li>)}
+            </ul>
+            <div class="project-links">
+              {p.liveUrl && (
+                <a class="btn btn-primary" href={p.liveUrl} target="_blank" rel="noreferrer">Live</a>
+              )}
+              <button type="button" class="btn btn-outline repo-open" data-repo={p.repoUrl} data-title={p.title}>Code</button>
+            </div>
+          </div>
+        </article>
+      ))}
     </div>
   )}
 
@@ -85,51 +79,35 @@ const projJson = (p) =>
   .project-open { cursor: pointer; }
   .project-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .projects-grid-toggle {
-    flex: none; margin-top: 0.5rem;
+    flex: none; margin-top: 0.4rem;
     display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 0.75rem;
-    background: var(--surface); color: var(--muted);
-    border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
-    cursor: pointer; transition: color 200ms ease, border-color 200ms ease;
+    width: 44px; height: 44px; border-radius: var(--r-card);
+    background: var(--surface); color: var(--muted); border: 1px solid var(--hair);
+    cursor: pointer; transition: color 150ms ease, border-color 150ms ease;
   }
   .projects-grid-toggle:hover { color: var(--accent); border-color: var(--accent); }
   .project-carousel { position: relative; }
   .project-track { touch-action: pan-y; user-select: none; }
 
-  /* Featured project — 1-at-a-time carousel above the grid. */
-  .featured-row { margin-bottom: 2rem; }
-  .featured-row .project-card {
-    flex: 0 0 100%;
-    display: flex; flex-direction: row; align-items: center; gap: 1.5rem;
-  }
-  .featured-project { position: relative; }
-  @media (max-width: 700px) {
-    .featured-row .project-card { flex-direction: column; align-items: stretch; }
-  }
-  .featured-img {
-    flex: 0 0 300px; width: 300px; height: 200px;
-    object-fit: contain; padding: 1rem; border-radius: 0.75rem; background: #0d1117;
-  }
+  /* Featured projects — static side-by-side (stacks on mobile) */
+  .featured-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
+  .featured-project { position: relative; display: flex; flex-direction: column; }
+  .featured-img { width: 100%; height: 200px; object-fit: contain; padding: 1rem; border-radius: var(--r-card); background: var(--bg); border: 1px solid var(--hair); margin-bottom: 1rem; }
   .featured-body { display: flex; flex-direction: column; align-items: flex-start; }
-  .featured-body .project-links { margin-top: 1rem; }
-  @media (max-width: 700px) {
-    .featured-project { flex-direction: column; align-items: stretch; }
-    .featured-img { flex-basis: auto; width: 100%; }
-  }
+  .featured-body .project-links { margin-top: 1rem; justify-content: flex-start; }
+  @media (max-width: 640px) { .featured-grid { grid-template-columns: 1fr; } }
   .featured-badge {
     position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2;
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
-    padding: 0.25rem 0.6rem; border-radius: 1rem;
+    padding: 0.2rem 0.5rem; border-radius: var(--r-tag);
     background: var(--accent); color: #fff;
   }
   .carousel-btn {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
-    width: 44px; height: 44px; border-radius: 50%;
+    width: 40px; height: 40px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    background: var(--surface); color: var(--text);
-    border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
-    font-size: 1.6rem; line-height: 1; cursor: pointer;
-    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+    background: var(--surface); color: var(--text); border: 1px solid var(--hair);
+    font-size: 1.5rem; line-height: 1; cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
   }
   .carousel-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
   .carousel-btn.prev { left: -8px; }

@@ -1,16 +1,6 @@
 ---
 import skills from '../data/skills.js';
-
-const enc = (s) => encodeURIComponent(s).replace(/-/g, '--');
-const badgeUrl = (s) => {
-  let url = `https://img.shields.io/badge/${enc(s.name)}-${s.color || '555555'}?style=for-the-badge`;
-  if (s.logo) url += `&logo=${s.logo}&logoColor=${s.logoColor || 'white'}`;
-  return url;
-};
-const groupData = (g) =>
-  JSON.stringify(
-    g.items.map((s) => ({ name: s.name, level: s.level, pct: s.pct, detail: s.detail, color: s.color, badge: badgeUrl(s) }))
-  );
+const groupData = (g) => JSON.stringify(g.items.map((s) => ({ name: s.name, detail: s.detail })));
 ---
 <section id="skills" class="skills reveal">
   <p class="eyebrow">Explore my</p>
@@ -24,23 +14,7 @@ const groupData = (g) =>
         </div>
         <div class="skill-list">
           {group.items.map((s) => (
-            <button
-              type="button"
-              class="skill-trigger"
-              data-name={s.name}
-              data-level={s.level}
-              data-pct={s.pct}
-              data-detail={s.detail}
-              data-color={s.color}
-              data-badge={badgeUrl(s)}
-              aria-label={`${s.name} details`}
-            >
-              {s.logoUrl ? (
-                <span class="skill-chip"><img src={s.logoUrl} alt="" />{s.name}</span>
-              ) : (
-                <img class="skill-badge" src={badgeUrl(s)} alt={s.name} height="30" loading="lazy" />
-              )}
-            </button>
+            <button type="button" class="skill-tag" data-name={s.name} data-detail={s.detail}>{s.name}</button>
           ))}
         </div>
       </div>

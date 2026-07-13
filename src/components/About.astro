@@ -1,7 +1,7 @@
 ---
 import certifications from '../data/certifications.js';
-const featured = certifications.filter((c) => c.featured);
-const rest = certifications.filter((c) => !c.featured);
+const primary = certifications.filter((c) => c.issuer !== 'Google Cloud');
+const GC_PROFILE = 'https://www.skills.google/public_profiles/c6214554-2530-4cdb-a3da-8cb58d22236c';
 
 const education = [
   { school: 'Mapúa Malayan Colleges Laguna', degree: 'BS Information Technology', period: '2022 – Present', note: "Dean's Lister", logo: '/images/mcl.webp' },
@@ -52,41 +52,26 @@ const education = [
     </button>
   </div>
 
-  {featured.length > 0 && (
-    <div class="featured-row">
-      {featured.map((c) => (
-        <article class="card featured-project">
-          <span class="featured-badge">★ Featured</span>
-          <img class="featured-img" src={c.logo} alt={`${c.issuer} logo`} draggable="false" />
-          <div class="featured-body">
-            <span class="cert-issuer">{c.issuer}</span>
-            <h3>{c.name}</h3>
-            <div class="project-links">
-              <a class="btn btn-outline" href={c.url} target="_blank" rel="noreferrer">View credential</a>
-            </div>
-          </div>
-        </article>
-      ))}
-    </div>
-  )}
-
-  <div class="project-carousel">
-    <button type="button" class="carousel-btn prev" aria-label="Previous certifications">&#8249;</button>
-    <div class="project-viewport">
-      <div class="project-track">
-        {rest.map((c) => (
-          <article class="card project-card cert-card">
-            <img class="cert-logo" src={c.logo} alt={`${c.issuer} logo`} />
-            <span class="cert-issuer">{c.issuer}</span>
-            <h4>{c.name}</h4>
-            <div class="project-links">
-              <a class="btn btn-outline" href={c.url} target="_blank" rel="noreferrer">View credential</a>
-            </div>
-          </article>
-        ))}
+  <div class="cert-grid">
+    {primary.map((c) => (
+      <article class={`card cert-card${c.featured ? ' cert-primary' : ''}`}>
+        {c.featured && <span class="cert-star">★ Featured</span>}
+        <img class="cert-logo" src={c.logo} alt={`${c.issuer} logo`} width="40" height="40" loading="lazy" />
+        <span class="cert-issuer">{c.issuer}</span>
+        <h4>{c.name}</h4>
+        <div class="project-links">
+          <a class="btn btn-outline" href={c.url} target="_blank" rel="noreferrer">View credential</a>
+        </div>
+      </article>
+    ))}
+    <article class="card cert-card gc-summary">
+      <span class="cert-issuer">Google Cloud</span>
+      <h4>8 skill badges</h4>
+      <p class="gc-desc">Networking &amp; Security, Infrastructure, and Data / ML &amp; AI in Google Cloud.</p>
+      <div class="project-links">
+        <a class="btn btn-outline" href={GC_PROFILE} target="_blank" rel="noreferrer">View all</a>
       </div>
-    </div>
-    <button type="button" class="carousel-btn next" aria-label="Next certifications">&#8250;</button>
+    </article>
   </div>
 </section>
 
@@ -98,10 +83,14 @@ const education = [
   .edu-card h4 { font-size: 1.05rem; }
   .edu-degree { margin: 0.2rem 0 0; }
   .edu-meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
-  @media (max-width: 600px) { .edu-grid { grid-template-columns: 1fr; } }
-  .cert-card { position: relative; flex-basis: 280px; }
+  .cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.25rem; }
+  .cert-card { position: relative; display: flex; flex-direction: column; }
+  .cert-primary { border-color: var(--accent); }
+  .cert-star { position: absolute; top: 0.9rem; right: 0.9rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent); }
   .cert-logo { width: 40px; height: 40px; object-fit: contain; margin-bottom: 0.75rem; }
-  .cert-issuer { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; text-transform: uppercase; }
+  .cert-issuer { color: var(--muted); text-transform: uppercase; }
   .cert-card h4 { font-size: 1.05rem; margin: 0.35rem 0 0; }
-  @media (max-width: 600px) { .cert-card { flex-basis: 80vw; } }
+  .cert-card .project-links { margin-top: auto; padding-top: 1rem; justify-content: flex-start; }
+  .gc-desc { color: var(--muted); font-size: 0.9rem; margin-top: 0.4rem; }
+  @media (max-width: 640px) { .edu-grid { grid-template-columns: 1fr; } }
 </style>
