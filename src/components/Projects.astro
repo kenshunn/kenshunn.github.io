@@ -60,7 +60,6 @@ const projJson = (p) =>
       <article class="card project-card project-open" role="button" tabindex="0" data-project={projJson(p)}>
         <img class="project-img" src={p.image} alt={p.title} draggable="false" width="320" height="160" loading="lazy" />
         <h3>{p.title}</h3>
-        <p class="project-desc">{p.description}</p>
         <ul class="tags">
           {p.tags.map((t) => <li>{t}</li>)}
         </ul>
