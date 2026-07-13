@@ -177,7 +177,7 @@ body:has(.hero) .hero { padding-top: 0; padding-bottom: 0; min-height: 100vh; }
 .ct-modal:not([hidden]) .ct-backdrop,
 .cw-modal:not([hidden]) .cw-backdrop,
 .cv-modal:not([hidden]) .cv-modal-backdrop,
-.doc-modal:not([hidden]) .doc-backdrop { animation: modal-fade 200ms ease both; }
+.doc-modal:not([hidden]) .doc-backdrop { animation: modal-fade 320ms ease both; }
 .pd-modal:not([hidden]) .pd-box,
 .repo-modal:not([hidden]) .repo-modal-box,
 .pm-modal:not([hidden]) .pm-box,
@@ -185,7 +185,7 @@ body:has(.hero) .hero { padding-top: 0; padding-bottom: 0; min-height: 100vh; }
 .ct-modal:not([hidden]) .ct-box,
 .cw-modal:not([hidden]) .cw-box,
 .cv-modal:not([hidden]) .cv-modal-box,
-.doc-modal:not([hidden]) .doc-box { animation: modal-pop 280ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.doc-modal:not([hidden]) .doc-box { animation: modal-pop 440ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 @media (prefers-reduced-motion: reduce) {
   .pd-box, .repo-modal-box, .pm-box, .skill-modal-box, .ct-box, .cw-box, .cv-modal-box, .doc-box,
   .pd-backdrop, .repo-modal-backdrop, .pm-backdrop, .skill-modal-backdrop, .ct-backdrop, .cw-backdrop, .cv-modal-backdrop, .doc-backdrop { animation: none !important; }
