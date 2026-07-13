@@ -55,14 +55,18 @@
 </style>
 
 <script>
-  const el = document.querySelector('.tagline .tw');
-  if (el) {
+  function typeTagline() {
+    const el = document.querySelector('.tagline .tw');
+    if (!el) return;
     const full = el.getAttribute('data-text') || '';
     let i = 0;
     const type = () => {
+      if (!document.body.contains(el)) return; // element swapped away
       el.textContent = full.slice(0, i);
       if (i++ <= full.length) setTimeout(type, 75);
     };
     type();
   }
+  typeTagline();
+  document.addEventListener('astro:page-load', typeTagline);
 </script>

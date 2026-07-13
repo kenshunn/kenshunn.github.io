@@ -40,17 +40,25 @@ const isActive = (href) => path === href;
 </nav>
 
 <script>
-  const burger = document.querySelector('.hamburger');
-  const menu = document.querySelector('.mobile-menu');
-  burger?.addEventListener('click', () => menu?.classList.toggle('open'));
-  menu?.querySelectorAll('a').forEach((a) =>
-    a.addEventListener('click', () => menu.classList.remove('open'))
-  );
-
-  const toggle = document.getElementById('theme-toggle');
-  toggle?.addEventListener('click', () => {
-    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', cur);
-    try { localStorage.setItem('theme', cur); } catch (e) { /* ignore */ }
-  });
+  // Delegated on document so it survives view-transition navigations
+  // (the navbar DOM is swapped on each page change). Guard to bind once.
+  if (!window.__navBound) {
+    window.__navBound = true;
+    document.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t.closest('.hamburger')) {
+        document.querySelector('.mobile-menu')?.classList.toggle('open');
+        return;
+      }
+      if (t.closest('.mobile-menu a')) {
+        document.querySelector('.mobile-menu')?.classList.remove('open');
+        return;
+      }
+      if (t.closest('#theme-toggle')) {
+        const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', cur);
+        try { localStorage.setItem('theme', cur); } catch (err) { /* ignore */ }
+      }
+    });
+  }
 </script>
