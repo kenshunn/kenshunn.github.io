@@ -26,23 +26,27 @@ if (!window.__gsapTransitions) {
   let dir = 1, busy = false;
   const waitMs = (ms) => new Promise((res) => setTimeout(res, ms));
 
-  const coverIn = (toPath) => new Promise((resolve) => {
+  const coverIn = () => new Promise((resolve) => {
     const r = rows();
     if (!r.length) { resolve(); return; }
+    const lb = label();
+    if (lb) gsap.set(lb, { autoAlpha: 0, y: 12 }); // keep label hidden while covering
     gsap.killTweensOf(r);
     gsap.set(r, { xPercent: -101 * dir });
-    const lb = label();
-    if (lb) { lb.textContent = LABELS[toPath] || ''; gsap.set(lb, { autoAlpha: 0, y: 12 }); }
-    const tl = gsap.timeline({ onComplete: resolve });
-    tl.to(r, { xPercent: 0, duration: DUR, ease: 'power3.inOut', stagger: STAG });
-    if (lb) tl.to(lb, { autoAlpha: 1, y: 0, duration: 0.3, ease: 'power2.out' }); // only once fully covered
+    gsap.to(r, { xPercent: 0, duration: DUR, ease: 'power3.inOut', stagger: STAG, onComplete: resolve });
   });
+
+  const showLabel = (toPath) => {
+    const lb = label();
+    if (!lb) return;
+    lb.textContent = LABELS[toPath] || '';
+    gsap.fromTo(lb, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.3, ease: 'power2.out' });
+  };
+  const hideLabel = () => { const lb = label(); if (lb) gsap.to(lb, { autoAlpha: 0, duration: 0.2, ease: 'power1.out' }); };
 
   const revealOut = () => new Promise((resolve) => {
     const r = rows();
     if (!r.length) { resolve(); return; }
-    const lb = label();
-    if (lb) gsap.to(lb, { autoAlpha: 0, duration: 0.2, ease: 'power1.out' });
     gsap.killTweensOf(r);
     gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power3.inOut', stagger: STAG, onComplete: resolve });
   });
@@ -52,12 +56,13 @@ if (!window.__gsapTransitions) {
     busy = true;
     const toPath = norm(pathname), fromPath = norm(location.pathname);
     dir = (ORDER[toPath] ?? 0) >= (ORDER[fromPath] ?? 0) ? 1 : -1;
-    await coverIn(toPath);
-    await waitMs(HOLD * 1000);
+    await coverIn();          // blocks slide in to fully cover
+    showLabel(toPath);        // label appears only now (fully covered)
+    await waitMs(HOLD * 1000); // pause — label visible during this hold
+    hideLabel();
     try { await navigate(pathname); } catch (e) { location.href = pathname; return; }
-    // page-load fires after the swap; give it a tick, then uncover
-    await waitMs(60);
-    await revealOut();
+    await waitMs(60);         // let the swap settle
+    await revealOut();        // blocks slide off, revealing the new page
     busy = false;
   }
 
