@@ -104,7 +104,7 @@ h2 { font-size: 2rem; margin-bottom: 1.5rem; }
 /* Dock nav — floating pill at bottom, macOS-style tiles + tooltip labels */
 .dock {
   position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
-  z-index: 50; max-width: calc(100vw - 24px);
+  z-index: 60; max-width: calc(100vw - 24px);
 }
 .dock-items {
   display: flex; align-items: flex-end; gap: 6px; list-style: none; margin: 0;
@@ -208,7 +208,7 @@ h2 { font-size: 2rem; margin-bottom: 1.5rem; }
 .contact-fallback { display: flex; gap: 1.5rem; margin-top: 1.5rem; color: var(--muted); }
 
 /* Footer */
-.footer { text-align: center; padding: 1.25rem 24px; color: var(--muted); position: relative; background: var(--bg); border-top: 1px solid var(--hair); font-size: 0.85rem; }
+.footer { text-align: center; padding: 1.25rem 24px; color: var(--muted); position: relative; z-index: 1; background: var(--bg); border-top: 1px solid var(--hair); font-size: 0.85rem; }
 .footer-links { display: flex; gap: 1.25rem; list-style: none; justify-content: center; margin-bottom: 0.5rem; }
 
 /* Scroll reveal — fade + 12px up, once, 400ms */
