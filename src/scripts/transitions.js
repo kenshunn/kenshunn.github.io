@@ -56,14 +56,14 @@ if (!window.__gsapTransitions) {
     if (lb) gsap.to(lb, { autoAlpha: 0, duration: 0.35, ease: 'power1.out' });
     gsap.killTweensOf(r);
     if (didCover) {
-      // exit the cover off-screen in the sweep direction
-      gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power4.inOut', stagger: STAG, delay: 0.1 });
+      // exit the cover off-screen, continuing the same sweep direction
+      gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power4.inOut', stagger: STAG });
     } else {
-      // direct / first load: no cover happened — keep rows parked off-screen, no sweep
+      // direct / first load: no cover ran — just park rows off-screen, no sweep
       gsap.set(r, { xPercent: -101 });
     }
-    const main = document.querySelector('body > main');
-    if (main) gsap.from(main, { autoAlpha: 0, y: 24, duration: 0.7, ease: 'power3.out', clearProps: 'opacity,visibility,transform' });
+    // NOTE: no <main> fade — the page already sits under the cover, so fading it
+    // here read like a reload flash and could strand it hidden.
   };
 
   const reveal = () => {
