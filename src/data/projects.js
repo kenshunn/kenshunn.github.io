@@ -26,8 +26,8 @@ const projects = [
   {
     title: 'Clock In',
     description:
-      'Proximity-aware attendance authentication using Bluetooth Low Energy beacons. Restricts app access to specific WiFi SSIDs, binds devices to accounts for a BYOD policy, and delivers real-time in-app notifications and user feedback.',
-    tags: ['Kotlin', 'Jetpack Compose', 'BLE', 'MFA'],
+      'Proximity-aware attendance authentication using Bluetooth Low Energy beacons and multi-layer verification. Restricts app access to specific WiFi SSIDs, binds devices to accounts for a BYOD policy, and delivers real-time in-app notifications and user feedback.',
+    tags: ['Kotlin', 'Jetpack Compose', 'BLE', 'Multi-layer Verification'],
     repoUrl: 'https://github.com/jgtrea/ClockIn-Application',
     liveUrl: '',
     image: '/images/clockin.svg',
