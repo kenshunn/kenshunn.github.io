@@ -162,10 +162,10 @@ body:has(.hero) {
 }
 body:has(.hero) .hero { padding-top: 0; padding-bottom: 0; min-height: 100vh; }
 
-/* Single-viewport pages (Experience / Skills / Garden / Contact) — no scroll */
-body:has(.screen) { overflow: hidden; padding-bottom: 0; }
-body:has(.screen) > main { display: flex; flex-direction: column; }
-.screen { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center; padding-top: 2rem; padding-bottom: 120px; }
+/* Experience / Skills / Garden / Contact — normal top-aligned flow that scrolls
+   (the forced single-viewport/no-scroll broke mobile and mis-centered content) */
+.screen { min-height: calc(100vh - 200px); }
+@media (max-width: 640px) { .screen { min-height: 0; } }
 
 /* Modal open animation (project detail / repo / all-projects grid) */
 @keyframes modal-pop { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
