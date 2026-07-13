@@ -18,10 +18,10 @@
 </section>
 
 <style is:global>
-  .contact { text-align: center; }
+  .contact { text-align: left; }
   .contact-form {
     display: flex; flex-direction: column; gap: 1rem;
-    width: 100%; max-width: 520px; margin: 2.5rem auto 0;
+    width: 100%; max-width: 520px; margin: 2.5rem 0 0;
     text-align: left;
   }
   .contact-form input,
@@ -34,13 +34,9 @@
   .form-ok { color: var(--accent); font-family: var(--font-mono); font-size: 0.85rem; margin: 0; }
   .form-ok:empty { display: none; }
   .contact-fallback {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 1.25rem;
+    display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 1.25rem;
     margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--hair);
     color: var(--muted); font-size: 0.95rem;
-  }
-  @media (max-width: 640px) {
-    .contact { text-align: left; }
-    .contact-fallback { justify-content: flex-start; }
   }
 </style>
 
