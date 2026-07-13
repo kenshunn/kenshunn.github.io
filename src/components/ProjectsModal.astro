@@ -74,13 +74,15 @@ import projects from '../data/projects.js';
 </style>
 
 <script>
-  const modal = document.getElementById('projects-modal');
-  const toggle = document.getElementById('projects-grid-toggle');
-  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
-  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
-  toggle?.addEventListener('click', open);
-  modal?.querySelectorAll('[data-pm-close]').forEach((el) => el.addEventListener('click', close));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
-  });
+  if (!window.__projectsModalBound) {
+    window.__projectsModalBound = true;
+    const close = () => { const m = document.getElementById('projects-modal'); if (m) { m.setAttribute('hidden', ''); document.body.style.overflow = ''; } };
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#projects-grid-toggle')) { const m = document.getElementById('projects-modal'); if (m) { m.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; } return; }
+      if (e.target.closest('#projects-modal [data-pm-close], #projects-modal .pm-backdrop')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { const m = document.getElementById('projects-modal'); if (m && !m.hasAttribute('hidden')) close(); }
+    });
+  }
 </script>

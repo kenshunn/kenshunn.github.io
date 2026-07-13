@@ -62,13 +62,15 @@ const certs = [...certifications].sort((a, b) => (b.featured ? 1 : 0) - (a.featu
 </style>
 
 <script>
-  const modal = document.getElementById('certs-modal');
-  const toggle = document.getElementById('certs-grid-toggle');
-  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
-  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
-  toggle?.addEventListener('click', open);
-  modal?.querySelectorAll('[data-ct-close]').forEach((el) => el.addEventListener('click', close));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
-  });
+  if (!window.__certsModalBound) {
+    window.__certsModalBound = true;
+    const close = () => { const m = document.getElementById('certs-modal'); if (m) { m.setAttribute('hidden', ''); document.body.style.overflow = ''; } };
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#certs-grid-toggle')) { const m = document.getElementById('certs-modal'); if (m) { m.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; } return; }
+      if (e.target.closest('#certs-modal [data-ct-close], #certs-modal .ct-backdrop')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { const m = document.getElementById('certs-modal'); if (m && !m.hasAttribute('hidden')) close(); }
+    });
+  }
 </script>

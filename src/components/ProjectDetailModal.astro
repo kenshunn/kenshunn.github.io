@@ -48,54 +48,59 @@
 </style>
 
 <script>
-  const modal = document.getElementById('project-detail-modal');
-  const titleEl = document.getElementById('pd-title');
-  const bodyEl = document.getElementById('pd-body');
-  const footEl = document.getElementById('pd-foot');
-  const esc = (s) => (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
-  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
-
-  const render = (p) => {
-    if (titleEl) titleEl.textContent = p.title || 'Project';
-    if (bodyEl) {
-      const tags = (p.tags || []).map((t) => `<li>${esc(t)}</li>`).join('');
-      const shots = (p.gallery || []).length
-        ? p.gallery.map((g) => {
-            const src = typeof g === 'string' ? g : g.src;
-            const cap = typeof g === 'string' ? '' : (g.caption || '');
-            return `<figure class="pd-fig"><img class="pd-shot" src="${esc(src)}" alt="${esc(p.title)} screenshot" loading="lazy" />${cap ? `<figcaption>${esc(cap)}</figcaption>` : ''}</figure>`;
-          }).join('')
-        : '<p class="pd-empty">Screenshots coming soon.</p>';
-      bodyEl.innerHTML = `
-        <img class="pd-hero" src="${esc(p.image)}" alt="${esc(p.title)}" />
-        <ul class="tags">${tags}</ul>
-        <p class="pd-desc">${esc(p.description)}</p>
-        ${shots}`;
-      bodyEl.scrollTop = 0;
-    }
-    if (footEl) {
-      const live = p.liveUrl ? `<a class="btn btn-primary" href="${esc(p.liveUrl)}" target="_blank" rel="noreferrer">Live</a>` : '';
-      const code = `<a class="btn btn-outline" href="${esc(p.repoUrl)}" target="_blank" rel="noreferrer">Code</a>`;
-      footEl.innerHTML = live + code;
-    }
-    open();
-  };
-
-  document.querySelectorAll('.project-open').forEach((card) => {
-    const go = (e) => {
-      if (e.target.closest('button, a')) return; // let inner Code/Live buttons work
+  // Delegated on document so it survives view-transition navigations.
+  if (!window.__pdModalBound) {
+    window.__pdModalBound = true;
+    const esc = (s) => (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const close = () => {
+      const m = document.getElementById('project-detail-modal');
+      if (m) { m.setAttribute('hidden', ''); document.body.style.overflow = ''; }
+    };
+    const render = (p) => {
+      const modal = document.getElementById('project-detail-modal');
+      const titleEl = document.getElementById('pd-title');
+      const bodyEl = document.getElementById('pd-body');
+      const footEl = document.getElementById('pd-foot');
+      if (titleEl) titleEl.textContent = p.title || 'Project';
+      if (bodyEl) {
+        const tags = (p.tags || []).map((t) => `<li>${esc(t)}</li>`).join('');
+        const shots = (p.gallery || []).length
+          ? p.gallery.map((g) => {
+              const src = typeof g === 'string' ? g : g.src;
+              const cap = typeof g === 'string' ? '' : (g.caption || '');
+              return `<figure class="pd-fig"><img class="pd-shot" src="${esc(src)}" alt="${esc(p.title)} screenshot" loading="lazy" />${cap ? `<figcaption>${esc(cap)}</figcaption>` : ''}</figure>`;
+            }).join('')
+          : '<p class="pd-empty">Screenshots coming soon.</p>';
+        bodyEl.innerHTML = `
+          <img class="pd-hero" src="${esc(p.image)}" alt="${esc(p.title)}" />
+          <ul class="tags">${tags}</ul>
+          <p class="pd-desc">${esc(p.description)}</p>
+          ${shots}`;
+        bodyEl.scrollTop = 0;
+      }
+      if (footEl) {
+        const live = p.liveUrl ? `<a class="btn btn-primary" href="${esc(p.liveUrl)}" target="_blank" rel="noreferrer">Live</a>` : '';
+        const code = `<a class="btn btn-outline" href="${esc(p.repoUrl)}" target="_blank" rel="noreferrer">Code</a>`;
+        footEl.innerHTML = live + code;
+      }
+      if (modal) { modal.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; }
+    };
+    const openFrom = (card) => {
       let p = {};
       try { p = JSON.parse(card.getAttribute('data-project') || '{}'); } catch (err) { p = {}; }
       render(p);
     };
-    card.addEventListener('click', go);
-    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(e); } });
-  });
 
-  modal?.querySelectorAll('[data-pd-close]').forEach((el) => el.addEventListener('click', close));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
-  });
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#project-detail-modal [data-pd-close], #project-detail-modal .pd-backdrop')) { close(); return; }
+      const card = e.target.closest('.project-open');
+      if (card && !e.target.closest('button, a')) openFrom(card);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { const m = document.getElementById('project-detail-modal'); if (m && !m.hasAttribute('hidden')) close(); return; }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('project-open')) {
+        e.preventDefault(); openFrom(e.target);
+      }
+    });
+  }
 </script>

@@ -50,20 +50,6 @@ const { title = 'Ken Aaron De Martin — Portfolio' } = Astro.props;
       <div class="cursor-ring"></div>
       <div class="cursor-dot"></div>
     </div>
-    <script is:inline>
-      (function () {
-        if (window.__veilBound) return;
-        window.__veilBound = true;
-        var veil = document.getElementById('page-veil');
-        document.addEventListener('astro:before-preparation', function () {
-          if (veil) veil.classList.add('veil-on');
-        });
-        document.addEventListener('astro:page-load', function () {
-          // brief hold so the blur cover is visible even on fast local swaps
-          setTimeout(function () { if (veil) veil.classList.remove('veil-on'); }, 140);
-        });
-      })();
-    </script>
     <Navbar />
     <slot />
     <Footer />
@@ -78,6 +64,7 @@ const { title = 'Ken Aaron De Martin — Portfolio' } = Astro.props;
     <script>
       import '../scripts/reveal.js';
       import '../scripts/cursor.js';
+      import '../scripts/transitions.js';
     </script>
   </body>
 </html>

@@ -151,9 +151,12 @@ const projJson = (p) =>
 </style>
 
 <script>
+  function initCarousels() {
   document.querySelectorAll('.project-carousel').forEach((wrap) => {
+    if (wrap.dataset.carouselInit) return; // already wired on this page
     const track = wrap.querySelector('.project-track');
     if (!track || track.children.length === 0) return;
+    wrap.dataset.carouselInit = '1';
     const EASE = 0.2;      // arrow glide stiffness
     const FRICTION = 0.86; // drag-release momentum decay (lower = stops sooner)
     const MAX_V = 16;      // speed cap (px/frame) for fling + wheel
@@ -228,4 +231,7 @@ const projJson = (p) =>
 
     // Navigation is arrow-only — swipe/drag/wheel scrolling is intentionally disabled.
   });
+  }
+  initCarousels();
+  document.addEventListener('astro:page-load', initCarousels);
 </script>

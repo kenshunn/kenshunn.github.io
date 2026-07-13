@@ -51,60 +51,55 @@
 </style>
 
 <script>
-  const modal = document.getElementById('repo-modal');
-  const titleEl = document.getElementById('repo-modal-title');
-  const bodyEl = document.getElementById('repo-readme');
-  const visitEl = document.getElementById('repo-visit');
+  if (!window.__repoModalBound) {
+    window.__repoModalBound = true;
 
-  function parseRepo(url) {
-    const m = (url || '').replace(/\.git$/, '').match(/github\.com\/([^/]+)\/([^/?#]+)/i);
-    return m ? { owner: m[1], repo: m[2] } : null;
-  }
-
-  function openModal() {
-    modal?.removeAttribute('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal() {
-    modal?.setAttribute('hidden', '');
-    document.body.style.overflow = '';
-  }
-
-  async function loadReadme(owner, repo) {
-    if (!bodyEl) return;
-    bodyEl.innerHTML = '<p class="repo-state">Loading preview…</p>';
-    try {
-      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`, {
-        headers: { Accept: 'application/vnd.github.html' },
-      });
-      if (!res.ok) throw new Error(String(res.status));
-      const html = await res.text();
-      bodyEl.innerHTML = html;
-      bodyEl.scrollTop = 0;
-      bodyEl.querySelectorAll('a').forEach((a) => {
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noreferrer');
-      });
-    } catch (err) {
-      bodyEl.innerHTML =
-        '<p class="repo-state">Preview unavailable. Open the repository directly with the button below.</p>';
+    function parseRepo(url) {
+      const m = (url || '').replace(/\.git$/, '').match(/github\.com\/([^/]+)\/([^/?#]+)/i);
+      return m ? { owner: m[1], repo: m[2] } : null;
     }
-  }
+    const close = () => { const m = document.getElementById('repo-modal'); if (m) { m.setAttribute('hidden', ''); document.body.style.overflow = ''; } };
 
-  document.querySelectorAll('.repo-open').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    async function loadReadme(owner, repo) {
+      const bodyEl = document.getElementById('repo-readme');
+      if (!bodyEl) return;
+      bodyEl.innerHTML = '<p class="repo-state">Loading preview…</p>';
+      try {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`, {
+          headers: { Accept: 'application/vnd.github.html' },
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const html = await res.text();
+        bodyEl.innerHTML = html;
+        bodyEl.scrollTop = 0;
+        bodyEl.querySelectorAll('a').forEach((a) => {
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noreferrer');
+        });
+      } catch (err) {
+        bodyEl.innerHTML =
+          '<p class="repo-state">Preview unavailable. Open the repository directly with the button below.</p>';
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#repo-modal [data-repo-close], #repo-modal .repo-modal-backdrop')) { close(); return; }
+      const btn = e.target.closest('.repo-open');
+      if (!btn) return;
       const url = btn.getAttribute('data-repo');
       const info = parseRepo(url);
+      const titleEl = document.getElementById('repo-modal-title');
+      const bodyEl = document.getElementById('repo-readme');
+      const visitEl = document.getElementById('repo-visit');
+      const modal = document.getElementById('repo-modal');
       if (titleEl) titleEl.textContent = btn.getAttribute('data-title') || 'Repository';
       if (visitEl) visitEl.setAttribute('href', url || '#');
-      openModal();
+      if (modal) { modal.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; }
       if (info) loadReadme(info.owner, info.repo);
       else if (bodyEl) bodyEl.innerHTML = '<p class="repo-state">Open the repository with the button below.</p>';
     });
-  });
-
-  modal?.querySelectorAll('[data-repo-close]').forEach((el) => el.addEventListener('click', closeModal));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) closeModal();
-  });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { const m = document.getElementById('repo-modal'); if (m && !m.hasAttribute('hidden')) close(); }
+    });
+  }
 </script>

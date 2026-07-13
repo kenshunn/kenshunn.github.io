@@ -40,13 +40,15 @@ const DOC_ID = '1sH0LkMZdnhMKOrCUtSa0bW4SWmih_u5TY0lxNlwKXHE';
 </style>
 
 <script>
-  const modal = document.getElementById('practicum-modal');
-  const opener = document.getElementById('practicum-open');
-  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
-  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
-  opener?.addEventListener('click', open);
-  modal?.querySelectorAll('[data-doc-close]').forEach((el) => el.addEventListener('click', close));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
-  });
+  if (!window.__practicumModalBound) {
+    window.__practicumModalBound = true;
+    const close = () => { const m = document.getElementById('practicum-modal'); if (m) { m.setAttribute('hidden', ''); document.body.style.overflow = ''; } };
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#practicum-open')) { const m = document.getElementById('practicum-modal'); if (m) { m.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; } return; }
+      if (e.target.closest('#practicum-modal [data-doc-close], #practicum-modal .doc-backdrop')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { const m = document.getElementById('practicum-modal'); if (m && !m.hasAttribute('hidden')) close(); }
+    });
+  }
 </script>

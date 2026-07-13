@@ -47,52 +47,47 @@
 </style>
 
 <script>
-  const modal = document.getElementById('skill-modal');
-  const titleEl = document.getElementById('skill-modal-title');
-  const bodyEl = document.getElementById('skill-modal-body');
-  const PERCENT = { Certified: 95, Proficient: 78, Familiar: 50 };
-
-  const open = () => { modal?.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; };
-  const close = () => { modal?.setAttribute('hidden', ''); document.body.style.overflow = ''; };
-  const esc = (s) =>
-    (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-  const rowHtml = (s) => `
-      <div class="skill-row">
-        <span class="skill-row-name">${esc(s.name)}</span>
-        <p>${esc(s.detail || '')}</p>
-      </div>`;
-
-  const render = (title, items) => {
-    if (titleEl) titleEl.textContent = title;
-    if (bodyEl) { bodyEl.innerHTML = items.map(rowHtml).join(''); bodyEl.scrollTop = 0; }
-    open();
-  };
-
-  document.querySelectorAll('.skill-group').forEach((card) => {
-    const openGroup = () => {
+  // Delegated on document so it survives view-transition navigations
+  // (modal + triggers are re-created on every client-side page change).
+  if (!window.__skillModalBound) {
+    window.__skillModalBound = true;
+    const esc = (s) =>
+      (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const rowHtml = (s) => `
+        <div class="skill-row">
+          <span class="skill-row-name">${esc(s.name)}</span>
+          <p>${esc(s.detail || '')}</p>
+        </div>`;
+    const close = () => {
+      const m = document.getElementById('skill-modal');
+      if (m) { m.setAttribute('hidden', ''); document.body.style.overflow = ''; }
+    };
+    const render = (title, items) => {
+      const modal = document.getElementById('skill-modal');
+      const titleEl = document.getElementById('skill-modal-title');
+      const bodyEl = document.getElementById('skill-modal-body');
+      if (titleEl) titleEl.textContent = title;
+      if (bodyEl) { bodyEl.innerHTML = items.map(rowHtml).join(''); bodyEl.scrollTop = 0; }
+      if (modal) { modal.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; }
+    };
+    const openGroup = (card) => {
       let items = [];
       try { items = JSON.parse(card.getAttribute('data-skills') || '[]'); } catch (e) { items = []; }
       render(card.getAttribute('data-group') || 'Skills', items);
     };
-    card.addEventListener('click', openGroup);
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGroup(); }
-    });
-  });
 
-  document.querySelectorAll('.skill-tag').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      render(btn.getAttribute('data-name') || 'Skill', [{
-        name: btn.getAttribute('data-name'),
-        detail: btn.getAttribute('data-detail'),
-      }]);
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#skill-modal [data-skill-close], #skill-modal .skill-modal-backdrop')) { close(); return; }
+      const tag = e.target.closest('.skill-tag');
+      if (tag) { e.stopPropagation(); render(tag.getAttribute('data-name') || 'Skill', [{ name: tag.getAttribute('data-name'), detail: tag.getAttribute('data-detail') }]); return; }
+      const grp = e.target.closest('.skill-group');
+      if (grp) { openGroup(grp); }
     });
-  });
-
-  modal?.querySelectorAll('[data-skill-close]').forEach((el) => el.addEventListener('click', close));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) close();
-  });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { const m = document.getElementById('skill-modal'); if (m && !m.hasAttribute('hidden')) close(); return; }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('skill-group')) {
+        e.preventDefault(); openGroup(e.target);
+      }
+    });
+  }
 </script>

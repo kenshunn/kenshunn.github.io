@@ -65,52 +65,40 @@
 </style>
 
 <script>
-  const modal = document.getElementById('cv-modal');
-  const opener = document.getElementById('cv-open');
-  const pages = document.getElementById('cv-pages');
+  if (!window.__cvModalBound) {
+    window.__cvModalBound = true;
+    const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.mjs';
+    const WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs';
 
-  const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.mjs';
-  const WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs';
-  let rendered = false;
-
-  async function renderCv() {
-    if (rendered || !pages) return;
-    rendered = true;
-    try {
-      const pdfjs = await import(/* @vite-ignore */ PDFJS);
-      pdfjs.GlobalWorkerOptions.workerSrc = WORKER;
-      const pdf = await pdfjs.getDocument('/cv.pdf').promise;
-      pages.innerHTML = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 2 });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        pages.appendChild(canvas);
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    async function renderCv() {
+      const pages = document.getElementById('cv-pages');
+      if (!pages || pages.querySelector('canvas')) return; // already rendered on this page
+      try {
+        const pdfjs = await import(/* @vite-ignore */ PDFJS);
+        pdfjs.GlobalWorkerOptions.workerSrc = WORKER;
+        const pdf = await pdfjs.getDocument('/cv.pdf').promise;
+        pages.innerHTML = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          pages.appendChild(canvas);
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        }
+      } catch (err) {
+        pages.innerHTML = '<p class="cv-state">Preview unavailable — use the buttons below to view the CV.</p>';
       }
-    } catch (err) {
-      rendered = false;
-      pages.innerHTML = '<p class="cv-state">Preview unavailable — use the buttons below to view the CV.</p>';
     }
-  }
+    const close = () => { const m = document.getElementById('cv-modal'); if (m) { m.setAttribute('hidden', ''); document.body.style.overflow = ''; } };
 
-  function openModal() {
-    modal?.removeAttribute('hidden');
-    document.body.style.overflow = 'hidden';
-    renderCv();
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#cv-open')) { const m = document.getElementById('cv-modal'); if (m) { m.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; renderCv(); } return; }
+      if (e.target.closest('#cv-modal [data-cv-close], #cv-modal .cv-modal-backdrop')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { const m = document.getElementById('cv-modal'); if (m && !m.hasAttribute('hidden')) close(); }
+    });
   }
-  function closeModal() {
-    modal?.setAttribute('hidden', '');
-    document.body.style.overflow = '';
-  }
-
-  opener?.addEventListener('click', openModal);
-  modal?.querySelectorAll('[data-cv-close]').forEach((el) =>
-    el.addEventListener('click', closeModal)
-  );
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && !modal.hasAttribute('hidden')) closeModal();
-  });
 </script>
