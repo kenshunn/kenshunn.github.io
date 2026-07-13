@@ -81,12 +81,10 @@ const projJson = (p) =>
   .project-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
   /* Secondary projects — responsive grid (replaces the carousel) */
-  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 0.5rem; }
-  .project-grid .project-card { width: auto; flex: initial; display: flex; flex-direction: column; height: 100%; }
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1rem; }
+  .project-grid .project-card { width: auto; min-width: 0; flex: initial; display: flex; flex-direction: column; height: 100%; }
   .project-grid .project-card .project-links { margin-top: auto; }
   @media (max-width: 640px) { .project-grid { grid-template-columns: 1fr; } }
-  .project-carousel { position: relative; }
-  .project-track { touch-action: pan-y; user-select: none; }
 
   /* Featured projects — full-width alternating image/text rows */
   .featured-rows { display: flex; flex-direction: column; gap: 4rem; margin-bottom: 5rem; }
@@ -123,105 +121,9 @@ const projJson = (p) =>
     padding: 0.2rem 0.5rem; border-radius: var(--r-tag);
     background: var(--accent); color: #fff; font-family: var(--font-mono); font-size: 0.68rem;
   }
-  .carousel-btn {
-    position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
-    width: 40px; height: 40px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--surface); color: var(--text); border: 1px solid var(--hair);
-    font-size: 1.5rem; line-height: 1; cursor: pointer;
-    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
-  }
-  .carousel-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .carousel-btn.prev { left: -8px; }
-  .carousel-btn.next { right: -8px; }
-  @media (max-width: 640px) {
-    .carousel-btn.prev { left: 0; }
-    .carousel-btn.next { right: 0; }
+  .featured-badge {
+    position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2;
+    padding: 0.2rem 0.5rem; border-radius: var(--r-tag);
+    background: var(--accent); color: #fff; font-family: var(--font-mono); font-size: 0.68rem;
   }
 </style>
-
-<script>
-  function initCarousels() {
-  document.querySelectorAll('.project-carousel').forEach((wrap) => {
-    if (wrap.dataset.carouselInit) return; // already wired on this page
-    const track = wrap.querySelector('.project-track');
-    if (!track || track.children.length === 0) return;
-    wrap.dataset.carouselInit = '1';
-    const EASE = 0.2;      // arrow glide stiffness
-    const FRICTION = 0.86; // drag-release momentum decay (lower = stops sooner)
-    const MAX_V = 16;      // speed cap (px/frame) for fling + wheel
-    const WHEEL_FACTOR = 0.5; // trackpad/wheel sensitivity
-    let pos = 0;           // current translateX (px)
-    let target = 0;        // arrow glide goal
-    let vel = 0;           // momentum velocity (px/frame)
-    let mode = 'idle';     // 'glide' (arrows) | 'inertia' (drag release)
-    let raf = null;
-    let dragging = false;
-    let startX = 0, startPos = 0, moved = 0, lastX = 0;
-
-    const step = () => {
-      const card = track.querySelector('.project-card');
-      const gap = parseFloat(getComputedStyle(track).columnGap || '24') || 24;
-      return card.getBoundingClientRect().width + gap;
-    };
-    const setX = (x) => { track.style.transform = `translateX(${x}px)`; };
-    const clamp = (v, m) => Math.max(-m, Math.min(m, v));
-    const viewport = wrap.querySelector('.project-viewport');
-    const cardW = () => track.querySelector('.project-card').getBoundingClientRect().width;
-    // center the focused card in the viewport (neighbors peek on both sides)
-    const recenter = () => { pos = (viewport.clientWidth - cardW()) / 2; rebalance(); setX(pos); };
-
-    // Recycle cards so pos stays within (-step, 0]; shifting pos AND target together
-    // keeps pixels + remaining distance intact -> seamless infinite loop, no snapping.
-    const rebalance = () => {
-      const s = step();
-      let g = 0;
-      while (pos <= -s && g++ < 400) { track.appendChild(track.firstElementChild); pos += s; target += s; }
-      while (pos > 0 && g++ < 400) { track.insertBefore(track.lastElementChild, track.firstElementChild); pos -= s; target -= s; }
-    };
-
-    const tick = () => {
-      if (mode === 'glide') {
-        pos += (target - pos) * EASE;
-        if (Math.abs(target - pos) < 0.5) { pos = target; mode = 'idle'; }
-      } else if (mode === 'inertia') {
-        pos += vel;
-        vel *= FRICTION;
-        if (Math.abs(vel) < 0.15) { vel = 0; mode = 'idle'; }
-      }
-      rebalance();
-      setX(pos);
-      raf = mode === 'idle' ? null : requestAnimationFrame(tick);
-    };
-    const run = () => { if (!raf) raf = requestAnimationFrame(tick); };
-
-    // --- Arrows: glide one card per press; spam accumulates for a fast multi-card glide.
-    const nudge = (dir) => {
-      if (dragging) return;
-      const base = mode === 'glide' ? target : pos;
-      target = base + (dir > 0 ? -step() : step());
-      mode = 'glide';
-      run();
-    };
-    wrap.querySelector('.carousel-btn.next')?.addEventListener('click', () => nudge(1));
-    wrap.querySelector('.carousel-btn.prev')?.addEventListener('click', () => nudge(-1));
-
-    // center on load and keep centered on resize
-    requestAnimationFrame(() => requestAnimationFrame(recenter));
-    window.addEventListener('resize', recenter);
-
-    // --- Auto-advance every 5s; pause on hover and when the tab is hidden.
-    let timer = null;
-    const startAuto = () => { if (!timer) timer = setInterval(() => nudge(1), 5000); };
-    const stopAuto = () => { if (timer) { clearInterval(timer); timer = null; } };
-    startAuto();
-    wrap.addEventListener('mouseenter', stopAuto);
-    wrap.addEventListener('mouseleave', startAuto);
-    document.addEventListener('visibilitychange', () => (document.hidden ? stopAuto() : startAuto()));
-
-    // Navigation is arrow-only — swipe/drag/wheel scrolling is intentionally disabled.
-  });
-  }
-  initCarousels();
-  document.addEventListener('astro:page-load', initCarousels);
-</script>
