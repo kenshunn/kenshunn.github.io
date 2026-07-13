@@ -16,23 +16,17 @@ import coursework from '../data/coursework.js';
       </svg>
     </button>
   </div>
-  <div class="project-carousel">
-    <button type="button" class="carousel-btn prev" aria-label="Previous coursework">&#8249;</button>
-    <div class="project-viewport">
-      <div class="project-track">
-        {coursework.map((c) => (
-          <article class="card project-card course-card">
-            <h4>{c.title}</h4>
-            <ul class="tags">
-              {c.tags.map((t) => <li>{t}</li>)}
-            </ul>
-            <div class="project-links">
-              <button type="button" class="btn btn-outline repo-open" data-repo={c.repoUrl} data-title={c.title}>Code</button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-    <button type="button" class="carousel-btn next" aria-label="Next coursework">&#8250;</button>
+  <div class="project-grid">
+    {coursework.map((c) => (
+      <article class="card project-card course-card">
+        <h4>{c.title}</h4>
+        <ul class="tags">
+          {c.tags.map((t) => <li>{t}</li>)}
+        </ul>
+        <div class="project-links">
+          <button type="button" class="btn btn-outline repo-open" data-repo={c.repoUrl} data-title={c.title}>Code</button>
+        </div>
+      </article>
+    ))}
   </div>
 </div>
