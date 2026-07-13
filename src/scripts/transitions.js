@@ -1,12 +1,11 @@
-// GSAP staggered-block page transition. We intercept internal link clicks,
-// play the cover, then call Astro's navigate() ourselves — reliable control of
-// the sequence without hooking the view-transition loader:
+// GSAP staggered-block page transition, driven purely by Astro's native
+// view-transition lifecycle (no nav hijacking — links navigate normally):
 //
-//   click -> cover slides in (direction = nav order) -> label shows once fully
-//   covered -> short hold -> navigate() swaps the page (hidden behind cover) ->
-//   cover slides out, revealing the new page.
+//   before-preparation : start the cover sweep (direction = nav order)
+//   before-swap        : snap fully covered + show the destination label,
+//                        so the DOM swap underneath is always hidden
+//   page-load          : hold covered, fade the label, uncover
 import gsap from 'gsap';
-import { navigate } from 'astro:transitions/client';
 
 const LABELS = {
   '/': 'Home', '/about': 'About Me', '/experience': 'Experience', '/skills': 'Skills',
@@ -22,24 +21,14 @@ if (!window.__gsapTransitions) {
   const label = () => document.querySelector('#page-blocks .pb-label');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const DUR = 0.6, STAG = 0.09, HOLD = 0.7; // seconds
-  let dir = 1, busy = false;
+  const DUR = 0.55, STAG = 0.08, HOLD = 0.7; // seconds
+  let dir = 1, busy = false, toPath = '/';
   const waitMs = (ms) => new Promise((res) => setTimeout(res, ms));
 
-  const coverIn = () => new Promise((resolve) => {
-    const r = rows();
-    if (!r.length) { resolve(); return; }
-    const lb = label();
-    if (lb) gsap.set(lb, { autoAlpha: 0, y: 12 }); // keep label hidden while covering
-    gsap.killTweensOf(r);
-    gsap.set(r, { xPercent: -101 * dir });
-    gsap.to(r, { xPercent: 0, duration: DUR, ease: 'power3.inOut', stagger: STAG, onComplete: resolve });
-  });
-
-  const showLabel = (toPath) => {
+  const showLabel = (path) => {
     const lb = label();
     if (!lb) return;
-    lb.textContent = LABELS[toPath] || '';
+    lb.textContent = LABELS[path] || '';
     gsap.fromTo(lb, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.3, ease: 'power2.out' });
   };
   const hideLabel = () => { const lb = label(); if (lb) gsap.to(lb, { autoAlpha: 0, duration: 0.2, ease: 'power1.out' }); };
@@ -51,46 +40,32 @@ if (!window.__gsapTransitions) {
     gsap.to(r, { xPercent: 101 * dir, duration: DUR, ease: 'power3.inOut', stagger: STAG, onComplete: resolve });
   });
 
-  // Wait for the swap to land: whichever comes first — Astro's page-load event
-  // or a timeout guard (so a missed event never leaves the cover stuck).
-  const swapped = () => new Promise((resolve) => {
-    let done = false;
-    const fin = () => { if (done) return; done = true; document.removeEventListener('astro:page-load', fin); resolve(); };
-    document.addEventListener('astro:page-load', fin, { once: true });
-    setTimeout(fin, 2500);
-  });
-
-  // cover -> label -> swap (hidden) -> hold -> uncover + fade label.
-  async function go(pathname) {
-    if (busy) return;
-    busy = true;
-    const toPath = norm(pathname), fromPath = norm(location.pathname);
-    dir = (ORDER[toPath] ?? 0) >= (ORDER[fromPath] ?? 0) ? 1 : -1;
-    await coverIn();                 // blocks slide in to fully cover
-    showLabel(toPath);               // label appears only now (fully covered)
-    const wait = swapped();
-    navigate(pathname).catch(() => { location.href = pathname; });
-    await wait;                      // swap has landed under the cover
-    await waitMs(HOLD * 1000);       // hold — covered, label visible
-    hideLabel();                     // fade the label out...
-    await revealOut();               // ...as the cover slides off together
-    busy = false;
-  }
-
   if (!reduce) {
-    document.addEventListener('click', (e) => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = e.target.closest && e.target.closest('a[href]');
-      if (!a) return;
-      const url = new URL(a.getAttribute('href'), location.href);
-      if (url.origin !== location.origin) return;                 // external
-      if (a.target === '_blank' || a.hasAttribute('download')) return;
-      if (url.pathname === location.pathname) return;             // same page / hash
-      e.preventDefault();
-      go(url.pathname + url.search);
-    }, true);
+    document.addEventListener('astro:before-preparation', (e) => {
+      const from = norm(e.from ? e.from.pathname : location.pathname);
+      toPath = norm(e.to ? e.to.pathname : location.pathname);
+      dir = (ORDER[toPath] ?? 0) >= (ORDER[from] ?? 0) ? 1 : -1;
+      busy = true;
+      const r = rows();
+      gsap.killTweensOf(r);
+      gsap.set(r, { xPercent: -101 * dir });
+      gsap.to(r, { xPercent: 0, duration: DUR, ease: 'power3.inOut', stagger: STAG });
+    });
 
-    // Direct / first load (no active transition): keep the cover parked off-screen.
-    document.addEventListener('astro:page-load', () => { if (!busy) gsap.set(rows(), { xPercent: -101 }); });
+    // Guarantee full cover right before the DOM is swapped, then show the label.
+    document.addEventListener('astro:before-swap', () => {
+      if (!busy) return;
+      gsap.killTweensOf(rows());
+      gsap.set(rows(), { xPercent: 0 });
+      showLabel(toPath);
+    });
+
+    document.addEventListener('astro:page-load', async () => {
+      if (!busy) { gsap.set(rows(), { xPercent: -101 }); return; } // direct/first load: park off-screen
+      await waitMs(HOLD * 1000); // hold — covered, label visible
+      hideLabel();
+      await revealOut();
+      busy = false;
+    });
   }
 }
