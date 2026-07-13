@@ -62,7 +62,7 @@
     const type = () => {
       if (!document.body.contains(el)) return; // element swapped away
       el.textContent = full.slice(0, i);
-      if (i++ <= full.length) setTimeout(type, 75);
+      if (i++ <= full.length) setTimeout(type, 95);
     };
     type();
   }
