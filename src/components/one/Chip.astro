@@ -1,0 +1,9 @@
+---
+const { href, dashed = false, label } = Astro.props;
+const cls = `chip${dashed ? ' dashed' : ''}`;
+---
+{href ? (
+  <a class={cls} href={href} target="_blank" rel="noopener"><slot />{label}</a>
+) : (
+  <span class={cls}><slot />{label}</span>
+)}

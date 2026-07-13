@@ -1,10 +1,226 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
----
+import OneLayout from '../layouts/OneLayout.astro';
+import ThemeToggle from '../components/one/ThemeToggle.astro';
+import Chip from '../components/one/Chip.astro';
+import SectionLabel from '../components/one/SectionLabel.astro';
+import Divider from '../components/one/Divider.astro';
+import ProjectRow from '../components/one/ProjectRow.astro';
+import ProjectCard from '../components/one/ProjectCard.astro';
+import certifications from '../data/certifications.js';
 
-<Layout title="Ken Aaron De Martin — Portfolio">
-  <main>
-    <Hero />
+const links = [
+  { label: 'GitHub', href: 'https://github.com/kenshunn' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ken-aaron-de-martin' },
+  { label: 'Twitter / X', href: 'https://twitter.com/catfroghae' },
+  { label: 'Email', href: 'mailto:aaron.11demartin@gmail.com' },
+  { label: 'CV', href: '/cv.pdf' },
+];
+const affiliations = [
+  'Mapúa Malayan Colleges Laguna',
+  'City Government of Biñan',
+  'CCNA',
+  'CompTIA Tech+',
+];
+
+const work = [
+  {
+    index: '01', year: '2025', org: 'CEDO',
+    title: 'Financial Assistance Program (CEDO)',
+    desc: 'A web-based voucher management system for an educational financial-assistance program for senior high school students. Admins and staff manage student records, generate PDF vouchers, run bulk imports, and keep audit logs.',
+    role: 'Full-stack Developer', stack: 'CodeIgniter 4 · PHP 8.2 · MySQL · Bootstrap 5', output: 'PDF vouchers, bulk import, audit logs',
+    image: '/images/cedo/2.webp', repoUrl: 'https://github.com/jgtrea/FinancialAssistanceProgram_G2',
+  },
+  {
+    index: '02', year: '2026', org: 'City Gov of Biñan',
+    title: 'Biñan Access Card',
+    desc: 'An access-card / ID management system for the City Government of Biñan, built during my web developer internship — card issuance, citizen records, and administration.',
+    role: 'Web Developer Intern', stack: 'PHP · MySQL · JavaScript', output: 'Card issuance & citizen records',
+    image: '/images/binan.webp', repoUrl: 'https://github.com/daki-crypto/binan_accesscard',
+  },
+  {
+    index: '03', year: '2025', org: 'Android',
+    title: 'Clock In',
+    desc: 'Proximity-aware attendance authentication using Bluetooth Low Energy beacons. Restricts app access to specific WiFi SSIDs, binds devices to accounts for a BYOD policy, and delivers real-time in-app notifications.',
+    role: 'Mobile Developer', stack: 'Kotlin · Jetpack Compose · BLE · Supabase', output: 'BYOD attendance app with MFA',
+    repoUrl: 'https://github.com/jgtrea/ClockIn-Application',
+  },
+  {
+    index: '04', year: '2024', org: 'Cryptography',
+    title: "Rubik's Cube Cipher",
+    desc: 'A 256-bit key, multi-block permutation cipher built on the Rubik\'s Cube state space, focused on the ciphering and deciphering logic.',
+    role: 'Developer', stack: 'Python', output: '256-bit permutation cipher',
+    repoUrl: 'https://github.com/JannersLSR/Rubik-s-Cube-Cipher',
+  },
+];
+
+const more = [
+  { title: 'Oasis (Twitter Clone)', blurb: 'Built the auth flow and API-based, real-time data flow between clients and servers.', tags: ['JavaScript', 'REST API', 'Auth'], repoUrl: 'https://github.com/IanSalandanan/TwitterClone' },
+  { title: 'CareBy', blurb: 'ASP.NET WebForms mental-health platform on a three-tier architecture with SQL Server.', tags: ['ASP.NET', 'C#', 'SQL Server'], repoUrl: 'https://github.com/IanSalandanan/IT114L-MP-CareBy' },
+  { title: 'Electric Billing', blurb: 'Electricity billing app on CodeIgniter 4 — customer records and bill generation via MVC.', tags: ['PHP', 'CodeIgniter 4', 'JavaScript'], repoUrl: 'https://github.com/kenshunn/electric_billing' },
+];
+
+const stack = [
+  { h: 'Languages', items: ['Kotlin', 'Python', 'JavaScript', 'C#', 'PHP', 'C++'] },
+  { h: 'Frameworks', items: ['Astro', 'Jetpack Compose', 'CodeIgniter 4', 'ASP.NET', 'Node.js', 'Bootstrap'] },
+  { h: 'Data', items: ['MySQL', 'SQL Server', 'Supabase', 'Oracle'] },
+  { h: 'Network & Security', items: ['CCNA', 'RHEL', 'TCP/IP', 'JWT', 'MFA'] },
+];
+
+const primaryCerts = certifications.filter((c) => c.issuer !== 'Google Cloud');
+const gcCerts = certifications.filter((c) => c.issuer === 'Google Cloud');
+const gcProfile = 'https://www.skills.google/public_profiles/c6214554-2530-4cdb-a3da-8cb58d22236c';
+
+const education = [
+  { name: 'Mapúa Malayan Colleges Laguna', sub: 'BS Information Technology · 2022–present · Dean\'s Lister' },
+  { name: 'FEU Alabang', sub: 'STEM — Information Technology · 2020–2022 · With Honors' },
+];
+---
+<OneLayout>
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#top" class="wordmark">@kenshunn</a>
+      <nav class="header-nav">
+        <a class="nav-link" href="#work">Work</a>
+        <a class="nav-link" href="#credentials">Credentials</a>
+        <a class="nav-link" href="#contact">Contact</a>
+        <ThemeToggle />
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="container hero">
+      <div class="hero-id">
+        <img class="hero-avatar" src="/images/profile.webp" alt="Ken Aaron De Martin" width="64" height="64" fetchpriority="high" />
+        <div>
+          <div class="name">Ken Aaron De Martin</div>
+          <div class="loc">Biñan, Laguna, Philippines</div>
+        </div>
+      </div>
+      <h1>Building software and the networks it runs on.</h1>
+      <p class="sub">IT student · web developer intern at the City Government of Biñan · CCNA &amp; CompTIA Tech+ certified.</p>
+      <div class="chip-row">
+        {links.map((l) => <Chip href={l.href} label={l.label} />)}
+        {affiliations.map((a) => <Chip dashed label={a} />)}
+      </div>
+    </section>
+
+    <Divider />
+
+    <!-- About -->
+    <section class="container section grid" id="about">
+      <SectionLabel label="About" />
+      <div class="body-col">
+        <p class="lead">
+          I'm an Information Technology student with a foundation in both network infrastructure and
+          software development. I work across the stack — from CodeIgniter and ASP.NET web systems to a
+          Kotlin attendance app — and I'm certified in CCNA and CompTIA Tech+.
+        </p>
+        <dl class="dl">
+          <dt>Now</dt><dd>Web developer intern, City Government of Biñan</dd>
+          <dt>Study</dt><dd>BS Information Technology, Mapúa MCL (Dean's Lister)</dd>
+          <dt>Seeking</dt><dd>Junior Network Administrator or Junior Software Developer roles</dd>
+        </dl>
+      </div>
+    </section>
+
+    <Divider />
+
+    <!-- Selected work -->
+    <section class="container section" id="work">
+      <div class="grid">
+        <SectionLabel label="Selected work" />
+        <div></div>
+      </div>
+      {work.map((w, i) => (
+        <>
+          <ProjectRow {...w} />
+          {i < work.length - 1 && <Divider />}
+        </>
+      ))}
+    </section>
+
+    <Divider />
+
+    <!-- More projects -->
+    <section class="container section grid" id="more">
+      <SectionLabel label="More projects" />
+      <div class="card-grid">
+        {more.map((m) => <ProjectCard {...m} />)}
+      </div>
+    </section>
+
+    <Divider />
+
+    <!-- Stack -->
+    <section class="container section grid" id="stack">
+      <SectionLabel label="Stack" />
+      <div class="stack-grid">
+        {stack.map((col) => (
+          <div class="stack-col">
+            <h3>{col.h}</h3>
+            <ul>{col.items.map((it) => <li>{it}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <Divider />
+
+    <!-- Credentials -->
+    <section class="container section grid" id="credentials">
+      <SectionLabel label="Credentials" />
+      <div class="cred-grid">
+        <div>
+          <p class="cred-h">Certifications</p>
+          <div class="cred-list">
+            {primaryCerts.map((c) => (
+              <div class="cred-item">
+                <div class="cred-name"><a href={c.url} target="_blank" rel="noopener">{c.name} ↗</a></div>
+                <div class="cred-sub">{c.issuer}</div>
+              </div>
+            ))}
+            <div class="cred-item">
+              <div class="cred-name"><a href={gcProfile} target="_blank" rel="noopener">{gcCerts.length} Google Cloud skill badges ↗</a></div>
+              <div class="cred-sub">Google Cloud · Networking, Security, Infrastructure, Data &amp; ML</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="cred-h">Education</p>
+          <div class="cred-list">
+            {education.map((e) => (
+              <div class="cred-item">
+                <div class="cred-name">{e.name}</div>
+                <div class="cred-sub">{e.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Divider />
+
+    <!-- Contact -->
+    <section class="container contact" id="contact">
+      <div class="grid">
+        <SectionLabel label="Contact" />
+        <div>
+          <h2><a href="mailto:aaron.11demartin@gmail.com">aaron.11demartin@gmail.com</a></h2>
+          <div class="chip-row">
+            {links.map((l) => <Chip href={l.href} label={l.label} />)}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <Divider />
+    <footer class="container footer-foot">
+      <span>© 2026 Ken Aaron De Martin</span>
+      <span>kenshunn.github.io</span>
+    </footer>
   </main>
-</Layout>
+</OneLayout>

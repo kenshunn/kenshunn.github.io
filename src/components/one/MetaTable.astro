@@ -1,0 +1,8 @@
+---
+const { role, stack, output } = Astro.props;
+---
+<dl class="meta-table">
+  {role && (<><dt>Role</dt><dd>{role}</dd></>)}
+  {stack && (<><dt>Stack</dt><dd>{stack}</dd></>)}
+  {output && (<><dt>Output</dt><dd>{output}</dd></>)}
+</dl>

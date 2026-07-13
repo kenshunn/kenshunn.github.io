@@ -1,0 +1,17 @@
+---
+import MetaTable from './MetaTable.astro';
+const { index, year, org, title, desc, role, stack, output, image, repoUrl } = Astro.props;
+---
+<div class="work-row">
+  <div class="rail">
+    <div class="work-index">{index}</div>
+    <p class="work-meta">{year}{org ? ` · ${org}` : ''}</p>
+  </div>
+  <div class="work-body">
+    <h2>{title}</h2>
+    <p>{desc}</p>
+    <MetaTable role={role} stack={stack} output={output} />
+    {image && <img class="work-shot" src={image} alt={`${title} screenshot`} width="1280" height="720" loading="lazy" />}
+    <a class="btn btn-primary" href={repoUrl} target="_blank" rel="noopener">View code</a>
+  </div>
+</div>

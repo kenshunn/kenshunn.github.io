@@ -1,0 +1,63 @@
+---
+import '../styles/one.css';
+const {
+  title = 'Ken Aaron De Martin — Portfolio',
+  description = 'Ken Aaron De Martin (@kenshunn) — IT student and web developer intern in Biñan, Laguna. Building software and the networks it runs on. CCNA & CompTIA Tech+ certified.',
+} = Astro.props;
+const url = 'https://kenshunn.github.io/';
+const ogImage = url + 'images/profile.webp';
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Anti-flash: set theme before stylesheet paints -->
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={url} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="theme-color" content="#f4f4f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161826" media="(prefers-color-scheme: dark)" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <slot />
+    <script>
+      // Theme toggle + live-follow OS when the user hasn't chosen explicitly.
+      const root = document.documentElement;
+      const mql = matchMedia('(prefers-color-scheme: dark)');
+      const apply = (t) => root.setAttribute('data-theme', t);
+      mql.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) apply(e.matches ? 'dark' : 'light');
+      });
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('#theme-toggle');
+        if (!btn) return;
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        apply(next);
+        try { localStorage.setItem('theme', next); } catch (err) { /* ignore */ }
+      });
+    </script>
+  </body>
+</html>
