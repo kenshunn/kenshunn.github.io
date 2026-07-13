@@ -265,23 +265,24 @@ html.has-custom-cursor input,
 html.has-custom-cursor textarea { cursor: none; }
 @media (hover: none), (pointer: coarse) { #cursor { display: none; } }
 
-/* Page transitions — GSAP owns the motion (see scripts/transitions.js).
-   Astro's default root cross-fade is disabled so only GSAP + the veil animate. */
+/* Page transitions — GSAP staggered-block wipe (see scripts/transitions.js).
+   Astro's default root cross-fade is disabled so only GSAP animates. */
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 
-#page-veil {
+#page-blocks {
   position: fixed; inset: 0; z-index: 9000; pointer-events: none;
-  visibility: hidden; opacity: 0;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
-  transition: backdrop-filter 300ms cubic-bezier(0.4, 0, 0.2, 1),
-              -webkit-backdrop-filter 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
 }
-#page-veil.veil-on {
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+#page-blocks .pb-row {
+  flex: 1 1 0; width: 100%;
+  background: var(--bg);
+  transform: scaleX(0); will-change: transform;
 }
-@media (prefers-reduced-motion: reduce) {
-  #page-veil { transition: none; }
+#page-blocks .pb-label {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-sans); font-weight: 700; font-size: clamp(1.6rem, 5vw, 2.6rem);
+  color: var(--text); opacity: 0; visibility: hidden;
 }
 
 /* Single mobile breakpoint */
