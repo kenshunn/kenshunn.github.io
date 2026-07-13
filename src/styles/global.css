@@ -275,14 +275,14 @@ html.has-custom-cursor textarea { cursor: none; }
 }
 #page-blocks .pb-row {
   flex: 1 1 0; width: 100%;
-  background: var(--bg);
-  transform: scaleX(0); will-change: transform;
+  background: var(--text); /* contrasts the page: dark cover in light mode, light in dark */
+  transform: translateX(-101%); will-change: transform;
 }
 #page-blocks .pb-label {
   position: absolute; inset: 0; z-index: 1;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-sans); font-weight: 700; font-size: clamp(1.6rem, 5vw, 2.6rem);
-  color: var(--text); opacity: 0; visibility: hidden;
+  color: var(--bg); opacity: 0; visibility: hidden;
 }
 
 /* Single mobile breakpoint */
