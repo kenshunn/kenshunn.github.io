@@ -5,6 +5,7 @@ const TYPED = '.eyebrow, h2, .coursework-title, .bio';
 const POP = [
   '.edu-card', '.cert-card', '.gc-summary', '.skill-group', '.exp-card',
   '.featured-row', '.project-card', '.course-card', '.timeline-item',
+  '.projects-grid-toggle',
 ].join(',');
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let skip = false;
