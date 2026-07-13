@@ -5,7 +5,7 @@ const GC_PROFILE = 'https://www.skills.google/public_profiles/c6214554-2530-4cdb
 
 const education = [
   { school: 'Mapúa Malayan Colleges Laguna', degree: 'BS Information Technology', period: '2022 – Present', note: "Dean's Lister", logo: '/images/mcl.webp' },
-  { school: 'Far Eastern University Alabang', degree: 'STEM — Information Technology', period: '2020 – 2022', note: 'Graduated with Honors', logo: '/images/feu.png' },
+  { school: 'Far Eastern University Alabang', degree: 'STEM — Information Technology', period: '2020 – 2022', note: 'Graduated with Honors', logo: '/images/feu.webp' },
 ];
 ---
 <section id="about" class="about reveal">
@@ -27,7 +27,7 @@ const education = [
   <div class="edu-grid">
     {education.map((e) => (
       <div class="card edu-card">
-        <img class="edu-logo" src={e.logo} alt={`${e.school} logo`} />
+        <img class="edu-logo" src={e.logo} alt={`${e.school} logo`} width="80" height="80" loading="lazy" />
         <div>
           <h4>{e.school}</h4>
           <p class="edu-degree">{e.degree}</p>
