@@ -121,7 +121,7 @@
     /* ---------- Effect B: hanging vine garland + flowers + fairy lights (light) ---------- */
     const STEM = [54, 110, 68], LEAF = [86, 148, 96], GLOW = [255, 214, 130];
     const FLOWERS = [[231, 84, 128], [239, 68, 68], [245, 158, 11], [168, 85, 247], [236, 72, 153], [250, 204, 21], [59, 130, 246]];
-    let strands = [], lights = [], bottomStems = [], bees = [];
+    let strands = [], lights = [], bottomStems = [], bees = [], birds = [];
     let gardenHidden = false, bottomHidden = false;
     const t0 = performance.now();
 
@@ -147,10 +147,10 @@
     const resetStrand = (s) => {
       s.len = rand(150, 380); s.chars = fillChars(s.len); s.seed = rand(0, TAU);
       s.tip = Math.random() < 0.7 ? FLOWERS[Math.floor(Math.random() * FLOWERS.length)] : null;
-      s.grown = 0; s.growSpeed = rand(0.3, 0.7); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(30, 180);
+      s.grown = 0; s.growSpeed = rand(0.3, 0.7); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(30, 180); s.visiting = false;
     };
     const gardenInit = () => {
-      strands = []; lights = []; falling = []; bottomStems = []; bees = [];
+      strands = []; lights = []; falling = []; bottomStems = []; bees = []; birds = [];
       const gap = 190;
       for (let x = gap / 2; x <= w; x += gap) strands.push(makeStrand(x + rand(-30, 30)));
       for (let k = 0; k < 2; k++) { strands.push(makeStrand(rand(20, 160))); strands.push(makeStrand(w - rand(20, 160))); }
@@ -211,6 +211,14 @@
       ctx.fillText(dir >= 0 ? '>≡·' : '·≡<', x, y);
       ctx.font = '13px ui-monospace, monospace';
     };
+    // ASCII bird that flies to a garland flower and perches; wings flap via wob.
+    const drawBird = (x, y, wob, dir, alpha) => {
+      ctx.font = 'bold 13px ui-monospace, monospace';
+      ctx.fillStyle = rgba([88, 72, 58], alpha);
+      const up = Math.sin(wob) > 0;
+      ctx.fillText(up ? (dir >= 0 ? '\\o>' : '<o/') : (dir >= 0 ? '/o>' : '<o\\'), x, y);
+      ctx.font = '13px ui-monospace, monospace';
+    };
     const makeBottomStem = (x) => {
       const len = rand(60, 150);
       return { x, len, chars: fillChars(len), grown: 0, growSpeed: rand(0.12, 0.28), seed: rand(0, TAU), sway: rand(4, 10), type: BLOOMS[Math.floor(Math.random() * BLOOMS.length)] };
@@ -226,7 +234,7 @@
       const docH = document.documentElement.scrollHeight;
       const bf = Math.max(0, 1 - (docH - (window.scrollY + h)) / (h * 0.85));
 
-      if (sf <= 0) { gardenHidden = true; falling.length = 0; }
+      if (sf <= 0) { gardenHidden = true; falling.length = 0; birds.length = 0; }
       else {
       // returning to the top: regrow everything from the start (staggered)
       if (gardenHidden) {
@@ -258,10 +266,11 @@
           s.grown += s.growSpeed * DT;
           if (s.grown >= s.len) { s.grown = s.len; s.state = 'hold'; s.hold = 120; }
         } else if (s.state === 'hold') {
-          s.hold -= DT;
-          if (s.hold <= 0) {
-            s.state = 'fade';
-            if (s.tip) falling.push({ x: strandX(s, s.len, t), y: 8 + s.len, vy: rand(0.25, 0.6), alpha: 1, color: s.tip, wob: rand(0, TAU) });
+          // Flowering vines wait for a bird to perch (see bird logic below).
+          // Plain vines drop on their own timer.
+          if (!s.tip) {
+            s.hold -= DT;
+            if (s.hold <= 0) s.state = 'fade';
           }
         } else if (s.state === 'fade') {
           s.alpha -= 0.008 * DT;
@@ -288,6 +297,37 @@
           drawFlowerAscii(strandX(s, s.len, t), 8 + s.len + STEPY, s.tip, 0.95 * s.alpha * sf);
         }
       }
+
+      // a bird flies to a flowering strand, perches, then the flower drops & the vine wilts
+      const perchable = strands.filter((s) => s.tip && s.state === 'hold' && s.delay <= 0 && s.grown >= s.len && !s.visiting);
+      if (birds.length < 1 && Math.random() < 0.012 * DT && perchable.length) {
+        const s = perchable[Math.floor(Math.random() * perchable.length)];
+        s.visiting = true;
+        birds.push({ target: s, x: Math.random() < 0.5 ? -30 : w + 30, y: rand(24, 90), hover: 0, leaving: false, wob: rand(0, TAU), lx: 0, ly: 0 });
+      }
+      birds = birds.filter((b) => {
+        b.wob += 0.18 * DT;
+        if (!b.leaving) {
+          const s = b.target;
+          const fx = strandX(s, s.len, t) + 8, fy = 8 + s.len - 6; // just beside the bloom
+          const dx = fx - b.x, dy = fy - b.y, dist = Math.hypot(dx, dy);
+          b.x += dx * 0.02 * DT; b.y += dy * 0.02 * DT;
+          drawBird(b.x, b.y, b.wob, dx >= 0 ? 1 : -1, sf);
+          if (dist < 14) {
+            b.hover += DT;
+            if (b.hover > 90) {
+              if (s.tip) falling.push({ x: strandX(s, s.len, t), y: 8 + s.len, vy: rand(0.25, 0.6), alpha: 1, color: s.tip, wob: rand(0, TAU) });
+              s.state = 'fade'; s.visiting = false;
+              b.leaving = true; b.lx = b.x < w / 2 ? -60 : w + 60; b.ly = rand(20, 80);
+            }
+          }
+        } else {
+          const dx = b.lx - b.x, dy = b.ly - b.y;
+          b.x += dx * 0.03 * DT; b.y += dy * 0.03 * DT;
+          drawBird(b.x, b.y, b.wob, dx >= 0 ? 1 : -1, sf);
+        }
+        return !(b.leaving && (b.x < -50 || b.x > w + 50));
+      });
 
       // falling ascii flowers
       falling = falling.filter((f) => {
