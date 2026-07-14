@@ -9,7 +9,7 @@
     </div>
     <div class="cv-pages" id="cv-pages"><p class="cv-state">Loading preview…</p></div>
     <div class="cv-modal-foot">
-      <a class="btn btn-primary" href="/KenAaronDeMartin-CV.pdf" download="/KenAaronDeMartin-CV.pdf">Download CV</a>
+      <a class="btn btn-primary" href="/KenAaronDeMartin-CV.pdf" download="KenAaronDeMartin-CV.pdf">Download CV</a>
       <a class="btn btn-outline" href="/KenAaronDeMartin-CV.pdf" target="_blank" rel="noreferrer">Open in new tab</a>
     </div>
   </div>
@@ -76,7 +76,7 @@
       try {
         const pdfjs = await import(/* @vite-ignore */ PDFJS);
         pdfjs.GlobalWorkerOptions.workerSrc = WORKER;
-        const pdf = await pdfjs.getDocument('/cv.pdf').promise;
+        const pdf = await pdfjs.getDocument('/KenAaronDeMartin-CV.pdf').promise;
         pages.innerHTML = '';
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
