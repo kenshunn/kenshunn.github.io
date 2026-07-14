@@ -11,6 +11,9 @@
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const ctx = canvas.getContext('2d');
     let w = 0, h = 0;
+    // Delta-time factor (1 = 60fps). Scales per-frame motion so speed is the
+    // same on 60Hz and 144Hz displays. Clamped to avoid jumps after stalls.
+    let DT = 1, lastT = performance.now();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const TAU = Math.PI * 2;
     const rand = (a, b) => a + Math.random() * (b - a);
@@ -65,7 +68,7 @@
       // aurora haze
       ctx.globalCompositeOperation = 'lighter';
       for (const a of aurora) {
-        a.x += a.vx; a.y += a.vy;
+        a.x += a.vx * DT; a.y += a.vy * DT;
         if (a.x < -a.r) a.x = w + a.r; if (a.x > w + a.r) a.x = -a.r;
         if (a.y < -a.r) a.y = h + a.r; if (a.y > h + a.r) a.y = -a.r;
         const g = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, a.r);
@@ -76,7 +79,7 @@
 
       // constellation
       for (const p of particles) {
-        p.x += p.vx; p.y += p.vy;
+        p.x += p.vx * DT; p.y += p.vy * DT;
         if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
         if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
       }
@@ -98,7 +101,7 @@
         const baseY = fr ? fr.getBoundingClientRect().top : h;
         ctx.font = '13px ui-monospace, monospace';
         for (const b of darkStems) {
-          if (b.grown < b.len) b.grown += b.growSpeed;
+          if (b.grown < b.len) b.grown += b.growSpeed * DT;
           for (const c of b.chars) {
             if (c.d > b.grown) break;
             const x = b.x + Math.sin(t * 0.6 + b.seed) * b.sway * (c.d / b.len);
@@ -249,18 +252,19 @@
       // strands lifecycle: grow -> hold -> flower drops -> fade -> regrow
       ctx.font = '13px ui-monospace, monospace';
       for (const s of strands) {
-        if (s.delay > 0) { s.delay--; continue; }
+        if (s.delay > 0) { s.delay -= DT; continue; }
 
         if (s.state === 'grow') {
-          s.grown += s.growSpeed;
+          s.grown += s.growSpeed * DT;
           if (s.grown >= s.len) { s.grown = s.len; s.state = 'hold'; s.hold = 120; }
         } else if (s.state === 'hold') {
-          if (--s.hold <= 0) {
+          s.hold -= DT;
+          if (s.hold <= 0) {
             s.state = 'fade';
             if (s.tip) falling.push({ x: strandX(s, s.len, t), y: 8 + s.len, vy: rand(0.25, 0.6), alpha: 1, color: s.tip, wob: rand(0, TAU) });
           }
         } else if (s.state === 'fade') {
-          s.alpha -= 0.008;
+          s.alpha -= 0.008 * DT;
           if (s.alpha <= 0) resetStrand(s);
         }
 
@@ -287,7 +291,7 @@
 
       // falling ascii flowers
       falling = falling.filter((f) => {
-        f.vy += 0.008; f.y += f.vy; f.wob += 0.05; f.x += Math.sin(f.wob) * 0.6; f.alpha -= 0.004;
+        f.vy += 0.008 * DT; f.y += f.vy * DT; f.wob += 0.05 * DT; f.x += Math.sin(f.wob) * 0.6 * DT; f.alpha -= 0.004 * DT;
         if (f.alpha <= 0 || f.y > h + 30) return false;
         drawFlowerAscii(f.x, f.y, f.color, Math.max(0, f.alpha) * sf);
         return true;
@@ -301,7 +305,7 @@
         const baseY = fr ? fr.getBoundingClientRect().top : h;
         ctx.font = '13px ui-monospace, monospace';
         for (const b of bottomStems) {
-          if (b.grown < b.len) b.grown += b.growSpeed;
+          if (b.grown < b.len) b.grown += b.growSpeed * DT;
           for (const c of b.chars) {
             if (c.d > b.grown) break;
             const swayX = Math.sin(t * 0.6 + b.seed) * b.sway * (c.d / b.len);
@@ -332,11 +336,12 @@
           bees.push({ x: Math.random() < 0.5 ? -20 : w + 20, oy: rand(80, 140), tx: s.x, toy: s.len + rand(4, 14), hover: 0, leaving: false, wob: rand(0, TAU), visits: Math.floor(rand(2, 5)) });
         }
         bees = bees.filter((be) => {
-          be.wob += 0.08;
+          be.wob += 0.08 * DT;
           const dx = be.tx - be.x, doy = be.toy - be.oy, dist = Math.hypot(dx, doy);
-          be.x += dx * 0.005; be.oy += doy * 0.005;
+          be.x += dx * 0.005 * DT; be.oy += doy * 0.005 * DT;
           drawBee(be.x, baseY - be.oy + Math.sin(be.wob) * 3, dx, bf);
-          if (!be.leaving && dist < 16 && ++be.hover > 80) {
+          if (!be.leaving && dist < 16) be.hover += DT;
+          if (!be.leaving && dist < 16 && be.hover > 80) {
             be.hover = 0; be.visits--;
             if (be.visits > 0 && bloomed.length) {
               const s = bloomed[Math.floor(Math.random() * bloomed.length)];
@@ -369,7 +374,14 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       pick();
     };
-    const frame = () => { if (!running) return; active.frame(); raf = requestAnimationFrame(frame); };
+    const frame = () => {
+      if (!running) return;
+      const now = performance.now();
+      DT = Math.min(3, Math.max(0.2, (now - lastT) / 16.667));
+      lastT = now;
+      active.frame();
+      raf = requestAnimationFrame(frame);
+    };
     const onVis = () => { const was = running; running = !document.hidden && !motionOff(); if (running && !was) frame(); };
     window.addEventListener('resize', resize);
     const mo = new MutationObserver((muts) => {
