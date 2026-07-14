@@ -121,7 +121,8 @@
     /* ---------- Effect B: hanging vine garland + flowers + fairy lights (light) ---------- */
     const STEM = [54, 110, 68], LEAF = [86, 148, 96], GLOW = [255, 214, 130];
     const FLOWERS = [[231, 84, 128], [239, 68, 68], [245, 158, 11], [168, 85, 247], [236, 72, 153], [250, 204, 21], [59, 130, 246]];
-    let strands = [], lights = [], bottomStems = [], bees = [], birds = [];
+    let strands = [], lights = [], bottomStems = [], bees = [], birds = [], grass = [];
+    const BLADES = ['|', '/', '\\', 'ı', "'"];
     let gardenHidden = false, bottomHidden = false;
     const t0 = performance.now();
 
@@ -150,7 +151,10 @@
       s.grown = 0; s.growSpeed = rand(0.3, 0.7); s.state = 'grow'; s.alpha = 1; s.hold = 0; s.delay = rand(30, 180); s.visiting = false;
     };
     const gardenInit = () => {
-      strands = []; lights = []; falling = []; bottomStems = []; bees = []; birds = [];
+      strands = []; lights = []; falling = []; bottomStems = []; bees = []; birds = []; grass = [];
+      for (let x = 4; x < w; x += rand(6, 13)) {
+        grass.push({ x, seed: rand(0, TAU), sway: rand(2, 5), ch: BLADES[Math.floor(Math.random() * BLADES.length)], tone: Math.random(), tall: Math.random() < 0.35 });
+      }
       const gap = 190;
       for (let x = gap / 2; x <= w; x += gap) strands.push(makeStrand(x + rand(-30, 30)));
       for (let k = 0; k < 2; k++) { strands.push(makeStrand(rand(20, 160))); strands.push(makeStrand(w - rand(20, 160))); }
@@ -343,7 +347,14 @@
         if (bottomHidden) bottomHidden = false;
         const fr = document.querySelector('.footer');
         const baseY = fr ? fr.getBoundingClientRect().top : h;
+        // grass tufts along the base (behind the flower stems)
         ctx.font = '13px ui-monospace, monospace';
+        for (const g of grass) {
+          const swayX = Math.sin(t * 0.8 + g.seed) * g.sway;
+          ctx.fillStyle = rgba(STEM, (0.28 + 0.22 * g.tone) * bf);
+          ctx.fillText(g.ch, g.x + swayX, baseY - 4);
+          if (g.tall) ctx.fillText(g.ch, g.x + swayX * 1.5, baseY - 15);
+        }
         for (const b of bottomStems) {
           if (b.grown < b.len) b.grown += b.growSpeed * DT;
           for (const c of b.chars) {
