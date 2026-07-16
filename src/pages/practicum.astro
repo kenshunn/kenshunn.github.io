@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+const DOC_ID = '1sH0LkMZdnhMKOrCUtSa0bW4SWmih_u5TY0lxNlwKXHE';
+---
+<Layout title="Practicum — Ken Aaron De Martin">
+  <main>
+    <section id="practicum" class="practicum reveal screen">
+      <p class="eyebrow">Internship</p>
+      <h2>Practicum</h2>
+      <p class="practicum-lead">
+        Final report from my web developer internship at the City Government of Biñan.
+      </p>
+      <div class="practicum-doc">
+        <iframe
+          src={`https://docs.google.com/document/d/${DOC_ID}/preview`}
+          title="Practicum Final Report"
+          loading="lazy"
+        ></iframe>
+      </div>
+      <div class="practicum-actions">
+        <a class="btn btn-primary" href={`https://docs.google.com/document/d/${DOC_ID}/view`} target="_blank" rel="noreferrer">Open in Google Docs</a>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style is:global>
+  .practicum-lead { color: var(--muted); max-width: 60ch; margin-bottom: 1.5rem; }
+  .practicum-doc {
+    border: 1px solid var(--hair); border-radius: var(--r-card); overflow: hidden;
+    background: #fff; height: 78vh; min-height: 480px;
+  }
+  .practicum-doc iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .practicum-actions { margin-top: 1.25rem; }
+</style>

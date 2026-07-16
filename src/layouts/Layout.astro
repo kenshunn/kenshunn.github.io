@@ -3,7 +3,6 @@ import '../styles/global.css';
 import { ViewTransitions } from 'astro:transitions';
 import Navbar from '../components/Navbar.astro';
 import CvModal from '../components/CvModal.astro';
-import PracticumModal from '../components/PracticumModal.astro';
 import ProjectDetailModal from '../components/ProjectDetailModal.astro';
 import RepoModal from '../components/RepoModal.astro';
 import SkillModal from '../components/SkillModal.astro';
@@ -51,7 +50,6 @@ const { title = 'Ken Aaron De Martin — Portfolio' } = Astro.props;
     <Navbar />
     <slot />
     <CvModal />
-    <PracticumModal />
     <ProjectDetailModal />
     <RepoModal />
     <SkillModal />
